@@ -17,12 +17,12 @@ const Navbar = () => {
 
   const getLinkClass = (path) =>
     location.pathname === path
-      ? "text-cyan-800 font-bold"
+      ? "text-cyan-800 font-semibold"
       : "text-gray-700 hover:text-cyan-800";
 
   return (
     <nav className="bg-white shadow-md">
-      <div className="container mx-auto  py-3 flex justify-between items-center">
+      <div className="container mx-auto max-w-[1400px] py-3 flex justify-between items-center">
         <a href="#">
           <img src="src\assets\Logo.png" alt="Logo" className="w-28" />
         </a>
