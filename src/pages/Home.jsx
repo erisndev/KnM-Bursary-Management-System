@@ -21,7 +21,7 @@ const Home = () => {
       {/* ======================== HERO SECTION ======================== */}
       <div
         className="bg-cover bg-center min-h-[100vh] w-full flex items-center justify-center relative"
-        style={{ backgroundImage: "url('src/assets/hero.jpg')" }}
+        style={{ backgroundImage: "url('./hero.jpg')" }}
       >
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="relative w-full px-6 sm:px-12 md:px-24 max-w-4xl text-white text-center">
@@ -175,35 +175,35 @@ const Home = () => {
               {
                 quote:
                   "The KnM Bursary App made it so easy to find and apply for funding. I received updates every step of the way!",
-                profile: "src/assets/student1.jpg",
+                profile: "./student1.jpg",
                 studentName: "Thabo Mokoena",
                 University: "University of Cape Town",
               },
               {
                 quote:
                   "Thanks to this app, I discovered bursaries I never knew existed. The application process was simple and stress-free.",
-                profile: "src/assets/student2.jpg",
+                profile: "./student2.jpg",
                 studentName: "Ayanda Nkosi",
                 University: "University of Limpopo",
               },
               {
                 quote:
                   "I loved how the dashboard helped me track my application status. I felt supported throughout my journey.",
-                profile: "src/assets/student3.jpg",
+                profile: "./student3.jpg",
                 studentName: "Naledi Dlamini",
                 University: "University of Johannesburg",
               },
               {
                 quote:
                   "The reminders and document upload feature made sure I never missed a deadline. Highly recommended!",
-                profile: "src/assets/student4.jpg",
+                profile: "./student4.jpg",
                 studentName: "Sipho Khumalo",
                 University: "University of Pretoria",
               },
               {
                 quote:
                   "With the KnM Bursary App, I could focus on my studies while the app handled the admin. It changed my life!",
-                profile: "src/assets/student5.jpg",
+                profile: "./student5.jpg",
                 studentName: "Zanele Mthembu",
                 University: "University of Stellenbosch",
               },

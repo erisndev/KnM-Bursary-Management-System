@@ -24,7 +24,7 @@ const Navbar = () => {
     <nav className="bg-white shadow-md">
       <div className="container mx-auto px-6 py-3 flex justify-between items-center">
         <a href="#">
-          <img src="src\assets\Logo.png" alt="Logo" className="w-32" />
+          <img src=".\Logo.png" alt="Logo" className="w-32" />
         </a>
         {!isOpen && (
           <div onClick={toggleMenu} className="cursor-pointer md:hidden">
