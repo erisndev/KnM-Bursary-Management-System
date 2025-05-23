@@ -43,7 +43,7 @@ const Register = () => {
     const validationErrors = validate();
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
-      // Submit form logic here
+      console.log("Register Form submitted:", form);
       alert("Registration successful!");
     }
   };

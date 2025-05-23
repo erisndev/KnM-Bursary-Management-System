@@ -36,7 +36,7 @@ const Contact = () => {
       setSubmitted(true);
       setLoading(false);
     }, 1500);
-    // Here you would typically send the form data to your backend
+    console.log("Contact Form submitted:", form);
   };
 
   return (

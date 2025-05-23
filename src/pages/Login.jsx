@@ -29,7 +29,7 @@ const Login = () => {
       setErrors(validationErrors);
       return;
     }
-    // Proceed with login logic here
+    console.log("Login Form submitted:", form);
   };
 
   return (
