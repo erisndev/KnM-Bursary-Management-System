@@ -59,8 +59,8 @@ const Register = () => {
             Let's start the journey together.
           </p>
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-            <div className="flex space-x-4">
-              <div className="w-1/2">
+            <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+              <div className="w-full sm:w-1/2">
                 <label
                   className="block text-sm font-medium mb-1"
                   htmlFor="firstName"
@@ -83,7 +83,7 @@ const Register = () => {
                   </p>
                 )}
               </div>
-              <div className="w-1/2">
+              <div className="w-full sm:w-1/2">
                 <label
                   className="block text-sm font-medium mb-1"
                   htmlFor="lastName"

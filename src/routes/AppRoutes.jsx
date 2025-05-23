@@ -2,7 +2,7 @@
 import { Routes, Route } from "react-router-dom";
 import Home from "../pages/Home";
 import ApplicationForm from "../pages/ApplicationForm";
-import Dashboard from "../pages/dashboard/Dashboard";
+import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import MainLayout from "../layouts/MainLayout";

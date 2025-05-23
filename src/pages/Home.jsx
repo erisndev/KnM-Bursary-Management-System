@@ -85,15 +85,11 @@ const Home = () => {
           ].map((item, index) => (
             <div
               key={index}
-              className="bg-white p-6 rounded-lg shadow-lg h-full flex flex-col items-center"
+              className="bg-white p-6 rounded-lg shadow-lg h-full flex flex-col "
             >
-              <div className="flex justify-center w-full">{item.icon}</div>
-              <h3 className="text-xl font-semibold text-center">
-                {item.title}
-              </h3>
-              <p className="mt-2 text-gray-600 flex-grow text-center">
-                {item.text}
-              </p>
+              <div className="flex  w-full">{item.icon}</div>
+              <h3 className="text-xl font-semibold ">{item.title}</h3>
+              <p className="mt-2 text-gray-600 flex-grow ">{item.text}</p>
               <a
                 href="#"
                 className="inline-flex items-center mt-4 text-cyan-700 hover:text-cyan-500 gap-1"
@@ -178,7 +174,7 @@ const Home = () => {
             {[
               {
                 quote:
-                  "The KNP Bursary App made it so easy to find and apply for funding. I received updates every step of the way!",
+                  "The KnM Bursary App made it so easy to find and apply for funding. I received updates every step of the way!",
                 profile: "src/assets/student1.jpg",
                 studentName: "Thabo Mokoena",
                 University: "University of Cape Town",
@@ -206,7 +202,7 @@ const Home = () => {
               },
               {
                 quote:
-                  "With the KNP Bursary App, I could focus on my studies while the app handled the admin. It changed my life!",
+                  "With the KnM Bursary App, I could focus on my studies while the app handled the admin. It changed my life!",
                 profile: "src/assets/student5.jpg",
                 studentName: "Zanele Mthembu",
                 University: "University of Stellenbosch",

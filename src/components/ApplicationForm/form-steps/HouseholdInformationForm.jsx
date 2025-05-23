@@ -1,0 +1,576 @@
+import React from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import FormField from "@/components/ui/form-field";
+import { cn } from "@/lib/utils";
+
+export default function HouseholdInformationForm({
+  formData,
+  handleInputChange,
+  handleSelectChange,
+  handleBlur,
+  errors,
+  touched,
+  focusRef,
+  memberCount,
+  handleAddMember,
+}) {
+  return (
+    <div className="w-full max-w-6xl mx-auto ">
+      <h2 className="text-xl font-semibold mb-2 text-center">
+        Financial Information
+      </h2>
+      <p className="text-gray-500 text-sm mb-12 text-center">
+        Please provide details about your household.
+      </p>
+
+      <div className="mb-6">
+        <Label htmlFor="numberOfMembers" className="flex">
+          Number of household members{" "}
+          <span className="text-red-500 ml-1">*</span>
+        </Label>
+        <Select
+          value={formData.numberOfMembers}
+          onValueChange={(value) => {
+            handleSelectChange("numberOfMembers", value);
+            handleBlur("numberOfMembers");
+          }}
+        >
+          <SelectTrigger
+            id="numberOfMembers"
+            className={cn(
+              "mt-1 w-full",
+              touched.numberOfMembers && errors.numberOfMembers
+                ? "border-red-500 focus-visible:ring-red-500"
+                : ""
+            )}
+          >
+            <SelectValue placeholder="Select number" />
+          </SelectTrigger>
+          <SelectContent>
+            {[...Array(9)].map((_, i) => (
+              <SelectItem key={i + 1} value={`${i + 1}`}>
+                {i + 1}
+              </SelectItem>
+            ))}
+            <SelectItem value="10+">10+</SelectItem>
+          </SelectContent>
+        </Select>
+        {touched.numberOfMembers && errors.numberOfMembers && (
+          <p className="text-red-500 text-xs mt-1">{errors.numberOfMembers}</p>
+        )}
+      </div>
+
+      {/* Parent 1 / Guardian 1 Information */}
+      <div className="mb-8">
+        <h3 className="text-lg font-medium mb-4">
+          Parent 1 / Guardian 1 Information
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          <div>
+            <Label htmlFor="parent1FirstName" className="flex">
+              First Name <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <Input
+              id="parent1FirstName"
+              value={formData.parent1FirstName}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur("parent1FirstName")}
+              placeholder="e.g., Mary"
+              className={cn(
+                "w-full mt-1",
+                touched.parent1FirstName && errors.parent1FirstName
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              )}
+              ref={
+                Object.keys(errors).length > 0 && errors.parent1FirstName
+                  ? focusRef
+                  : null
+              }
+            />
+            {touched.parent1FirstName && errors.parent1FirstName && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.parent1FirstName}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="parent1LastName" className="flex">
+              Last Name <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <Input
+              id="parent1LastName"
+              value={formData.parent1LastName}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur("parent1LastName")}
+              placeholder="e.g., Doe"
+              className={cn(
+                "w-full mt-1",
+                touched.parent1LastName && errors.parent1LastName
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              )}
+              ref={
+                Object.keys(errors).length > 0 && errors.parent1LastName
+                  ? focusRef
+                  : null
+              }
+            />
+            {touched.parent1LastName && errors.parent1LastName && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.parent1LastName}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="parent1Gender">Gender</Label>
+            <Input
+              id="parent1Gender"
+              value={formData.parent1Gender}
+              onChange={handleInputChange}
+              placeholder="e.g., Female"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="parent1Relationship" className="flex">
+              Relationship <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <Input
+              id="parent1Relationship"
+              value={formData.parent1Relationship}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur("parent1Relationship")}
+              placeholder="e.g., Mother"
+              className={cn(
+                "w-full mt-1",
+                touched.parent1Relationship && errors.parent1Relationship
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              )}
+              ref={
+                Object.keys(errors).length > 0 && errors.parent1Relationship
+                  ? focusRef
+                  : null
+              }
+            />
+            {touched.parent1Relationship && errors.parent1Relationship && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.parent1Relationship}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="parent1EmploymentStatus" className="flex">
+              Employment Status <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <Select
+              value={formData.parent1EmploymentStatus}
+              onValueChange={(value) => {
+                handleSelectChange("parent1EmploymentStatus", value);
+                handleBlur("parent1EmploymentStatus");
+              }}
+            >
+              <SelectTrigger
+                id="parent1EmploymentStatus"
+                className={cn(
+                  "mt-1 w-full",
+                  touched.parent1EmploymentStatus &&
+                    errors.parent1EmploymentStatus
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                )}
+              >
+                <SelectValue placeholder="Select employment status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="employed">Employed</SelectItem>
+                <SelectItem value="self-employed">Self-Employed</SelectItem>
+                <SelectItem value="unemployed">Unemployed</SelectItem>
+                <SelectItem value="retired">Retired</SelectItem>
+                <SelectItem value="student">Student</SelectItem>
+              </SelectContent>
+            </Select>
+            {touched.parent1EmploymentStatus &&
+              errors.parent1EmploymentStatus && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.parent1EmploymentStatus}
+                </p>
+              )}
+          </div>
+
+          <div>
+            <Label htmlFor="parent1Occupation">Occupation</Label>
+            <Input
+              id="parent1Occupation"
+              value={formData.parent1Occupation}
+              onChange={handleInputChange}
+              placeholder="e.g., Primary school teacher"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="parent1OtherIncome">Other form of income</Label>
+            <Select
+              value={formData.parent1OtherIncome}
+              onValueChange={(value) =>
+                handleSelectChange("parent1OtherIncome", value)
+              }
+            >
+              <SelectTrigger id="parent1OtherIncome" className="mt-1 w-full">
+                <SelectValue placeholder="No" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no">No</SelectItem>
+                <SelectItem value="rental">Rental Income</SelectItem>
+                <SelectItem value="investment">Investment Income</SelectItem>
+                <SelectItem value="pension">Pension</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="parent1MonthlyIncome">Monthly Income</Label>
+            <Input
+              id="parent1MonthlyIncome"
+              value={formData.parent1MonthlyIncome}
+              onChange={handleInputChange}
+              placeholder="e.g., $4000"
+              className="mt-1 w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Parent 2 / Guardian 2 Information */}
+      <div className="mb-8">
+        <h3 className="text-lg font-medium mb-4">
+          Parent 2 / Guardian 2 Information
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          <div>
+            <Label htmlFor="parent2FirstName">First Name</Label>
+            <Input
+              id="parent2FirstName"
+              value={formData.parent2FirstName}
+              onChange={handleInputChange}
+              placeholder="e.g., Mark"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="parent2LastName">Last Name</Label>
+            <Input
+              id="parent2LastName"
+              value={formData.parent2LastName}
+              onChange={handleInputChange}
+              placeholder="e.g., Doe"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="parent2Gender">Gender</Label>
+            <Input
+              id="parent2Gender"
+              value={formData.parent2Gender}
+              onChange={handleInputChange}
+              placeholder="e.g., Male"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="parent2Relationship">Relationship</Label>
+            <Input
+              id="parent2Relationship"
+              value={formData.parent2Relationship}
+              onChange={handleInputChange}
+              placeholder="e.g., Father"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="parent2EmploymentStatus">Employment Status</Label>
+            <Select
+              value={formData.parent2EmploymentStatus}
+              onValueChange={(value) =>
+                handleSelectChange("parent2EmploymentStatus", value)
+              }
+            >
+              <SelectTrigger
+                id="parent2EmploymentStatus"
+                className="mt-1 w-full"
+              >
+                <SelectValue placeholder="Select employment status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="employed">Employed</SelectItem>
+                <SelectItem value="self-employed">Self-Employed</SelectItem>
+                <SelectItem value="unemployed">Unemployed</SelectItem>
+                <SelectItem value="retired">Retired</SelectItem>
+                <SelectItem value="student">Student</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="parent2Occupation">Occupation</Label>
+            <Input
+              id="parent2Occupation"
+              value={formData.parent2Occupation}
+              onChange={handleInputChange}
+              placeholder="e.g., Primary school teacher"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="parent2OtherIncome">Other form of income</Label>
+            <Select
+              value={formData.parent2OtherIncome}
+              onValueChange={(value) =>
+                handleSelectChange("parent2OtherIncome", value)
+              }
+            >
+              <SelectTrigger id="parent2OtherIncome" className="mt-1 w-full">
+                <SelectValue placeholder="No" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no">No</SelectItem>
+                <SelectItem value="rental">Rental Income</SelectItem>
+                <SelectItem value="investment">Investment Income</SelectItem>
+                <SelectItem value="pension">Pension</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="parent2MonthlyIncome">Monthly Income</Label>
+            <Input
+              id="parent2MonthlyIncome"
+              value={formData.parent2MonthlyIncome}
+              onChange={handleInputChange}
+              placeholder="e.g., $3500"
+              className="mt-1 w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Member 1 Information */}
+      <div className="mb-8">
+        <h3 className="text-lg font-medium mb-4">Member 1 Information</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          <div>
+            <Label htmlFor="member1FirstName">First Name</Label>
+            <Input
+              id="member1FirstName"
+              value={formData.member1FirstName}
+              onChange={handleInputChange}
+              placeholder="e.g., Mark"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="member1LastName">Last Name</Label>
+            <Input
+              id="member1LastName"
+              value={formData.member1LastName}
+              onChange={handleInputChange}
+              placeholder="e.g., Doe"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="member1Gender">Gender</Label>
+            <Input
+              id="member1Gender"
+              value={formData.member1Gender}
+              onChange={handleInputChange}
+              placeholder="e.g., Male"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="member1Relationship">Relationship</Label>
+            <Input
+              id="member1Relationship"
+              value={formData.member1Relationship}
+              onChange={handleInputChange}
+              placeholder="e.g., Brother"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="member1EmploymentStatus">Employment Status</Label>
+            <Select
+              value={formData.member1EmploymentStatus}
+              onValueChange={(value) =>
+                handleSelectChange("member1EmploymentStatus", value)
+              }
+            >
+              <SelectTrigger
+                id="member1EmploymentStatus"
+                className="mt-1 w-full"
+              >
+                <SelectValue placeholder="Select employment status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="employed">Employed</SelectItem>
+                <SelectItem value="self-employed">Self-Employed</SelectItem>
+                <SelectItem value="unemployed">Unemployed</SelectItem>
+                <SelectItem value="student">Student</SelectItem>
+                <SelectItem value="minor">Minor</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="member1Occupation">Occupation</Label>
+            <Input
+              id="member1Occupation"
+              value={formData.member1Occupation}
+              onChange={handleInputChange}
+              placeholder="e.g., Student"
+              className="mt-1 w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="member1MonthlyIncome">Monthly Income</Label>
+            <Input
+              id="member1MonthlyIncome"
+              value={formData.member1MonthlyIncome}
+              onChange={handleInputChange}
+              placeholder="e.g., $0"
+              className="mt-1 w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Additional members */}
+      {Array.from({ length: memberCount - 1 }).map((_, index) => (
+        <div key={index} className="mb-8">
+          <h3 className="text-lg font-medium mb-4">
+            Member {index + 2} Information
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+            <div>
+              <Label htmlFor={`member${index + 2}FirstName`}>First Name</Label>
+              <Input
+                id={`member${index + 2}FirstName`}
+                placeholder="e.g., Jane"
+                className="mt-1 w-full"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor={`member${index + 2}LastName`}>Last Name</Label>
+              <Input
+                id={`member${index + 2}LastName`}
+                placeholder="e.g., Doe"
+                className="mt-1 w-full"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor={`member${index + 2}Gender`}>Gender</Label>
+              <Input
+                id={`member${index + 2}Gender`}
+                placeholder="e.g., Female"
+                className="mt-1 w-full"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor={`member${index + 2}Relationship`}>
+                Relationship
+              </Label>
+              <Input
+                id={`member${index + 2}Relationship`}
+                placeholder="e.g., Sister"
+                className="mt-1 w-full"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor={`member${index + 2}EmploymentStatus`}>
+                Employment Status
+              </Label>
+              <Select>
+                <SelectTrigger
+                  id={`member${index + 2}EmploymentStatus`}
+                  className="mt-1 w-full"
+                >
+                  <SelectValue placeholder="Select employment status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="employed">Employed</SelectItem>
+                  <SelectItem value="self-employed">Self-Employed</SelectItem>
+                  <SelectItem value="unemployed">Unemployed</SelectItem>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="minor">Minor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor={`member${index + 2}Occupation`}>Occupation</Label>
+              <Input
+                id={`member${index + 2}Occupation`}
+                placeholder="e.g., Student"
+                className="mt-1 w-full"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor={`member${index + 2}MonthlyIncome`}>
+                Monthly Income
+              </Label>
+              <Input
+                id={`member${index + 2}MonthlyIncome`}
+                placeholder="e.g., $0"
+                className="mt-1 w-full"
+              />
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <div className="mt-4 mb-8 flex justify-center">
+        <Button
+          type="button"
+          variant="outline"
+          className="text-cyan-800 border-cyan-800 hover:bg-cyan-50"
+          onClick={handleAddMember}
+        >
+          Add another member
+        </Button>
+      </div>
+    </div>
+  );
+}

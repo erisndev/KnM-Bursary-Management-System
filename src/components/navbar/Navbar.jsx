@@ -22,9 +22,9 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-md">
-      <div className="container mx-auto max-w-[1400px] py-3 flex justify-between items-center">
+      <div className="container mx-auto px-6 py-3 flex justify-between items-center">
         <a href="#">
-          <img src="src\assets\Logo.png" alt="Logo" className="w-28" />
+          <img src="src\assets\Logo.png" alt="Logo" className="w-32" />
         </a>
         {!isOpen && (
           <div onClick={toggleMenu} className="cursor-pointer md:hidden">
@@ -32,12 +32,12 @@ const Navbar = () => {
           </div>
         )}
         {isOpen && (
-          <div onClick={toggleMenu} className="cursor-pointer md:hidden z-20">
+          <div onClick={toggleMenu} className="cursor-pointer md:hidden z-50">
             <IoClose size={30} />
           </div>
         )}
         {isOpen ? (
-          <div className="bg-white overflow-y-hidden fixed z-10 top-0 left-0 w-screen min-h-screen flex justify-center items-center flex-col gap-10 duration-300 ease-in">
+          <div className="bg-white overflow-y-hidden fixed z-10 top-0 left-0 w-screen min-h-screen flex justify-center items-center flex-col gap-10 duration-300 ease-in px-8">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
@@ -55,7 +55,7 @@ const Navbar = () => {
             </Link>
           </div>
         ) : (
-          <div className="bg-white overflow-y-hidden fixed z-50 top-0 left-[-150%] w-screen min-h-screen flex justify-center items-center flex-col gap-10 duration-300 ease-in"></div>
+          <div className="bg-white overflow-y-hidden fixed z-50 top-0 left-[-150%] w-screen min-h-screen flex justify-center items-center flex-col gap-10 duration-300 ease-in px-8"></div>
         )}
         <div className="items-center gap-5 hidden md:flex">
           {navLinks.map((link) => (
