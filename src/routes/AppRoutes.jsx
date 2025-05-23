@@ -5,8 +5,8 @@ import ApplicationForm from "../pages/ApplicationForm";
 import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-import MainLayout from "../layouts/MainLayout";
 import Contact from "../pages/Contact";
+import MainLayout from "@/Layouts/MainLayout";
 
 const AppRoutes = () => {
   return (
