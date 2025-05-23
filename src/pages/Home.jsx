@@ -207,6 +207,13 @@ const Home = () => {
                 studentName: "Zanele Mthembu",
                 University: "University of Stellenbosch",
               },
+              {
+                quote:
+                  "With the KnM Bursary App, I could focus on my studies while the app handled the admin. It changed my life!",
+                profile: "./student6.jpg",
+                studentName: "Ferdinand Morena",
+                University: "University of Limpopo",
+              },
             ].map((item, index) => (
               <div
                 key={index}
