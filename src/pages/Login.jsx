@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -81,12 +82,11 @@ const Login = () => {
               {errors.password && (
                 <p className="text-red-500 text-xs mt-1">{errors.password}</p>
               )}
-              <a
-                href="#"
-                className="mb-1 mt-1 text-sm flex justify-end text-cyan-700 hover:text-cyan-500"
-              >
-                Forgot Password
-              </a>
+              <div className="mb-1 mt-1 text-sm flex justify-end">
+                <Link to="#" className="text-cyan-700 hover:text-cyan-500">
+                  Forgot Password
+                </Link>
+              </div>
             </div>
 
             <button
@@ -95,12 +95,15 @@ const Login = () => {
             >
               Login
             </button>
-            <p>
+            <div className="text-center mt-4">
               Don't have an Account?{" "}
-              <a href="/register" className="text-cyan-700 hover:text-cyan-500">
+              <Link
+                to="/register"
+                className="text-cyan-700 hover:text-cyan-500"
+              >
                 Register Here
-              </a>
-            </p>
+              </Link>
+            </div>
           </form>
         </div>
       </div>

@@ -20,14 +20,13 @@ const Footer = () => {
             <Input
               type="email"
               placeholder="Enter your email"
-              className="rounded-md bg-white flex-1"
+              className="rounded-md h-10 sm:h-10 min-h-[2.5rem] bg-white flex-1"
             />
-            <Button className="bg-cyan-700 hover:bg-cyan-800 cursor-pointer w-full sm:w-auto">
+            <Button className="h-10 sm:h-10 min-h-[2.5rem] bg-cyan-700 hover:bg-cyan-800 cursor-pointer w-full sm:w-auto">
               Subscribe
             </Button>
           </div>
         </div>
-
         {/* Footer Links */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm text-center sm:text-left px-2">
           <div>
@@ -90,7 +89,6 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-
         {/* Bottom Footer */}
         <div className="mt-12 border-t pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4 text-center sm:text-left">
           {/* Language selector */}
