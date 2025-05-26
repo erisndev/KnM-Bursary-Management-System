@@ -51,7 +51,7 @@ export default function HouseholdInformationForm({
                 : ""
             )}
           >
-            <SelectValue placeholder="Select number" />
+            <SelectValue placeholder="Select number of household members" />
           </SelectTrigger>
           <SelectContent>
             {[...Array(9)].map((_, i) => (
@@ -132,14 +132,32 @@ export default function HouseholdInformationForm({
           </div>
 
           <div>
-            <Label htmlFor="parent1Gender">Gender</Label>
+            <Label htmlFor="parent1Gender">
+              Gender <span className="text-red-500 ml-1">*</span>
+            </Label>
             <Input
               id="parent1Gender"
               value={formData.parent1Gender}
               onChange={handleInputChange}
               placeholder="e.g., Female"
-              className="mt-1 w-full"
+              onBlur={() => handleBlur("parent1Gender")}
+              className={cn(
+                "w-full mt-1",
+                touched.parent1Gender && errors.parent1Gender
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              )}
+              ref={
+                Object.keys(errors).length > 0 && errors.parent1Gender
+                  ? focusRef
+                  : null
+              }
             />
+            {touched.parent1Gender && errors.parent1Gender && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.parent1Gender}
+              </p>
+            )}
           </div>
 
           <div>

@@ -19,13 +19,12 @@ export default function EducationInformationForm({
   handleBlur,
   errors = {},
   touched = {},
+  setTouched = () => {}, // Provide a default no-op function
   validateField, // Validation function from parent component
   focusRef,
-  subjects,
-  setSubjects,
-  previousEducations,
-  setPreviousEducations,
+  subjects: initialSubjects = [],
 }) {
+  const [subjects, setSubjects] = useState(initialSubjects);
   const [subject, setSubject] = useState("");
   const [grade, setGrade] = useState("");
   const [editIndex, setEditIndex] = useState(-1);
@@ -33,6 +32,10 @@ export default function EducationInformationForm({
   const [gradeTouched, setGradeTouched] = useState(false);
   const [subjectError, setSubjectError] = useState("");
   const [gradeError, setGradeError] = useState("");
+
+  // Check if university is selected to determine if higher ed fields are required
+  const isUniversityEnrolled =
+    formData.currentEducationLevel === "university_enrolled";
 
   // Use parent's validation function for subjects if available
   const validateSubjectField = (value) => {
@@ -140,17 +143,6 @@ export default function EducationInformationForm({
   const handleDeleteSubject = (index) => {
     const updatedSubjects = subjects.filter((_, i) => i !== index);
     setSubjects(updatedSubjects);
-  };
-
-  const handlePreviousEducationChange = (index, field, value) => {
-    const updated = [...previousEducations];
-    updated[index][field] = value;
-    setPreviousEducations(updated);
-
-    // Validate the field if validation function is available
-    if (validateField && touched[`${field}-${index}`]) {
-      // Parent component will handle validation through formData updates
-    }
   };
 
   return (
@@ -360,66 +352,108 @@ export default function EducationInformationForm({
         </div>
       </div>
 
-      {/* Higher Education Info */}
-      <div className="mt-10">
-        <h3 className="text-lg font-medium mb-4">
-          Higher Education Information (Optional)
-        </h3>
-        {previousEducations.map((edu, idx) => (
-          <div
-            key={idx}
-            className="mb-8 border-b pb-6 last:border-b-0 last:pb-0"
+      {/* Current Education Level */}
+      <div className="mt-10 mb-8 w-full">
+        <h3 className="text-lg font-medium mb-4">Current Education Level</h3>
+        <div className="w-full">
+          <Label htmlFor="currentEducationLevel" className="flex text-md">
+            What is your current education level?{" "}
+            <span className="text-red-500 ml-1">*</span>
+          </Label>
+          <Select
+            value={formData.currentEducationLevel || ""}
+            onValueChange={(value) => {
+              handleLocalSelectChange("currentEducationLevel", value);
+              setTouched((prev) => ({
+                ...prev,
+                currentEducationLevel: true,
+              }));
+            }}
           >
+            <SelectTrigger
+              id="currentEducationLevel"
+              className={cn(
+                "w-full",
+                getFieldClassName("currentEducationLevel")
+              )}
+            >
+              <SelectValue placeholder="Select your current education level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="high_school_completed">
+                High School Completed
+              </SelectItem>
+              <SelectItem value="gap_year">Taking a Gap Year</SelectItem>
+              <SelectItem value="university_enrolled">
+                Currently Enrolled in University
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          {touched.currentEducationLevel && errors.currentEducationLevel && (
+            <p className="text-red-500 text-xs mt-1 flex items-center">
+              <AlertCircle className="w-3 h-3 mr-1" />
+              {errors.currentEducationLevel}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Higher Education Information - Now using formData instead of local state */}
+      {isUniversityEnrolled && (
+        <div className="mt-10">
+          <h3 className="text-lg font-medium mb-4">
+            Higher Education Information
+            {isUniversityEnrolled && (
+              <span className="text-red-500 ml-1">*</span>
+            )}
+          </h3>
+          <div className="mb-8 border-b pb-6 last:border-b-0 last:pb-0">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor={`institutionName-${idx}`}>
+                <Label htmlFor="institutionName" className="flex text-md">
                   Institution Name
+                  {isUniversityEnrolled && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
                 </Label>
                 <Input
-                  id={`institutionName-${idx}`}
-                  value={edu.institutionName || ""}
-                  onChange={(e) => {
-                    handlePreviousEducationChange(
-                      idx,
-                      "institutionName",
-                      e.target.value
-                    );
-                  }}
-                  onBlur={() => handleLocalBlur(`institutionName-${idx}`)}
+                  id="institutionName"
+                  value={formData.institutionName || ""}
+                  onChange={handleLocalInputChange}
+                  onBlur={() => handleLocalBlur("institutionName")}
                   placeholder="e.g., University of Example"
-                  className={getFieldClassName(`institutionName-${idx}`)}
+                  className={getFieldClassName("institutionName")}
                   maxLength={200}
                 />
-                {touched[`institutionName-${idx}`] &&
-                  errors[`institutionName-${idx}`] && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center">
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      {errors[`institutionName-${idx}`]}
-                    </p>
-                  )}
+                {touched.institutionName && errors.institutionName && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center">
+                    <AlertCircle className="w-3 h-3 mr-1" />
+                    {errors.institutionName}
+                  </p>
+                )}
               </div>
               <div>
-                <Label htmlFor={`institutionDegreeType-${idx}`}>
+                <Label htmlFor="institutionDegreeType" className="flex text-md">
                   Degree Type
+                  {isUniversityEnrolled && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
                 </Label>
                 <Select
-                  value={edu.institutionDegreeType || ""}
+                  value={formData.institutionDegreeType || ""}
                   onValueChange={(value) => {
-                    handlePreviousEducationChange(
-                      idx,
-                      "institutionDegreeType",
-                      value
-                    );
-                    handleLocalSelectChange(
-                      `institutionDegreeType-${idx}`,
-                      value
-                    );
+                    handleLocalSelectChange("institutionDegreeType", value);
+                    setTouched((prev) => ({
+                      ...prev,
+                      institutionDegreeType: true,
+                    }));
                   }}
                 >
                   <SelectTrigger
-                    id={`institutionDegreeType-${idx}`}
-                    className={getFieldClassName(
-                      `institutionDegreeType-${idx}`
+                    id="institutionDegreeType"
+                    className={cn(
+                      "w-full",
+                      getFieldClassName("institutionDegreeType")
                     )}
                   >
                     <SelectValue placeholder="Select degree type" />
@@ -434,171 +468,130 @@ export default function EducationInformationForm({
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
-                {touched[`institutionDegreeType-${idx}`] &&
-                  errors[`institutionDegreeType-${idx}`] && (
+                {touched.institutionDegreeType &&
+                  errors.institutionDegreeType && (
                     <p className="text-red-500 text-xs mt-1 flex items-center">
                       <AlertCircle className="w-3 h-3 mr-1" />
-                      {errors[`institutionDegreeType-${idx}`]}
+                      {errors.institutionDegreeType}
                     </p>
                   )}
               </div>
               <div>
-                <Label htmlFor={`institutionDegreeName-${idx}`}>
+                <Label htmlFor="institutionDegreeName" className="flex text-md">
                   Degree Name
+                  {isUniversityEnrolled && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
                 </Label>
                 <Input
-                  id={`institutionDegreeName-${idx}`}
-                  value={edu.institutionDegreeName || ""}
-                  onChange={(e) => {
-                    handlePreviousEducationChange(
-                      idx,
-                      "institutionDegreeName",
-                      e.target.value
-                    );
-                  }}
-                  onBlur={() => handleLocalBlur(`institutionDegreeName-${idx}`)}
+                  id="institutionDegreeName"
+                  value={formData.institutionDegreeName || ""}
+                  onChange={handleLocalInputChange}
+                  onBlur={() => handleLocalBlur("institutionDegreeName")}
                   placeholder="e.g., Bachelor of Science"
-                  className={getFieldClassName(`institutionDegreeName-${idx}`)}
+                  className={getFieldClassName("institutionDegreeName")}
                   maxLength={200}
                 />
-                {touched[`institutionDegreeName-${idx}`] &&
-                  errors[`institutionDegreeName-${idx}`] && (
+                {touched.institutionDegreeName &&
+                  errors.institutionDegreeName && (
                     <p className="text-red-500 text-xs mt-1 flex items-center">
                       <AlertCircle className="w-3 h-3 mr-1" />
-                      {errors[`institutionDegreeName-${idx}`]}
+                      {errors.institutionDegreeName}
                     </p>
                   )}
               </div>
               <div>
-                <Label htmlFor={`institutionMajor-${idx}`}>
+                <Label htmlFor="institutionMajor" className="flex text-md">
                   Major/Field of Study
+                  {isUniversityEnrolled && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
                 </Label>
                 <Input
-                  id={`institutionMajor-${idx}`}
-                  value={edu.institutionMajor || ""}
-                  onChange={(e) => {
-                    handlePreviousEducationChange(
-                      idx,
-                      "institutionMajor",
-                      e.target.value
-                    );
-                  }}
-                  onBlur={() => handleLocalBlur(`institutionMajor-${idx}`)}
+                  id="institutionMajor"
+                  value={formData.institutionMajor || ""}
+                  onChange={handleLocalInputChange}
+                  onBlur={() => handleLocalBlur("institutionMajor")}
                   placeholder="e.g., Computer Science"
-                  className={getFieldClassName(`institutionMajor-${idx}`)}
+                  className={getFieldClassName("institutionMajor")}
                   maxLength={100}
                 />
-                {touched[`institutionMajor-${idx}`] &&
-                  errors[`institutionMajor-${idx}`] && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center">
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      {errors[`institutionMajor-${idx}`]}
-                    </p>
-                  )}
+                {touched.institutionMajor && errors.institutionMajor && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center">
+                    <AlertCircle className="w-3 h-3 mr-1" />
+                    {errors.institutionMajor}
+                  </p>
+                )}
               </div>
               <div>
-                <Label htmlFor={`institutionStartYear-${idx}`}>
+                <Label htmlFor="institutionStartYear" className="flex text-md">
                   Start Year
+                  {isUniversityEnrolled && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
                 </Label>
                 <Input
-                  id={`institutionStartYear-${idx}`}
-                  value={edu.institutionStartYear || ""}
-                  onChange={(e) => {
-                    handlePreviousEducationChange(
-                      idx,
-                      "institutionStartYear",
-                      e.target.value
-                    );
-                  }}
-                  onBlur={() => handleLocalBlur(`institutionStartYear-${idx}`)}
+                  type="number"
+                  min="1900"
+                  max={new Date().getFullYear() + 5}
+                  id="institutionStartYear"
+                  value={formData.institutionStartYear || ""}
+                  onChange={handleLocalInputChange}
+                  onBlur={() => handleLocalBlur("institutionStartYear")}
                   placeholder="e.g., 2018"
-                  className={getFieldClassName(`institutionStartYear-${idx}`)}
+                  className={getFieldClassName("institutionStartYear")}
                 />
-                {touched[`institutionStartYear-${idx}`] &&
-                  errors[`institutionStartYear-${idx}`] && (
+                {touched.institutionStartYear &&
+                  errors.institutionStartYear && (
                     <p className="text-red-500 text-xs mt-1 flex items-center">
                       <AlertCircle className="w-3 h-3 mr-1" />
-                      {errors[`institutionStartYear-${idx}`]}
+                      {errors.institutionStartYear}
                     </p>
                   )}
               </div>
               <div>
-                <Label htmlFor={`institutionEndYear-${idx}`}>
+                <Label htmlFor="institutionEndYear">
                   End Year (or Expected)
                 </Label>
                 <Input
-                  id={`institutionEndYear-${idx}`}
-                  value={edu.institutionEndYear || ""}
-                  onChange={(e) => {
-                    handlePreviousEducationChange(
-                      idx,
-                      "institutionEndYear",
-                      e.target.value
-                    );
-                  }}
-                  onBlur={() => handleLocalBlur(`institutionEndYear-${idx}`)}
+                  type="number"
+                  min="1900"
+                  max={new Date().getFullYear() + 10}
+                  id="institutionEndYear"
+                  value={formData.institutionEndYear || ""}
+                  onChange={handleLocalInputChange}
+                  onBlur={() => handleLocalBlur("institutionEndYear")}
                   placeholder="e.g., 2022"
-                  className={getFieldClassName(`institutionEndYear-${idx}`)}
+                  className={getFieldClassName("institutionEndYear")}
                 />
-                {touched[`institutionEndYear-${idx}`] &&
-                  errors[`institutionEndYear-${idx}`] && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center">
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      {errors[`institutionEndYear-${idx}`]}
-                    </p>
-                  )}
+                {touched.institutionEndYear && errors.institutionEndYear && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center">
+                    <AlertCircle className="w-3 h-3 mr-1" />
+                    {errors.institutionEndYear}
+                  </p>
+                )}
               </div>
               <div>
-                <Label htmlFor={`institutionGPA-${idx}`}>
-                  GPA / Result (Optional)
-                </Label>
+                <Label htmlFor="institutionGPA">GPA / Result (Optional)</Label>
                 <Input
-                  id={`institutionGPA-${idx}`}
-                  value={edu.institutionGPA || ""}
-                  onChange={(e) => {
-                    handlePreviousEducationChange(
-                      idx,
-                      "institutionGPA",
-                      e.target.value
-                    );
-                  }}
-                  onBlur={() => handleLocalBlur(`institutionGPA-${idx}`)}
+                  id="institutionGPA"
+                  value={formData.institutionGPA || ""}
+                  onChange={handleLocalInputChange}
+                  onBlur={() => handleLocalBlur("institutionGPA")}
                   placeholder="e.g., 3.8 or A+"
-                  className={getFieldClassName(`institutionGPA-${idx}`)}
+                  className={getFieldClassName("institutionGPA")}
                 />
-                {touched[`institutionGPA-${idx}`] &&
-                  errors[`institutionGPA-${idx}`] && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center">
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      {errors[`institutionGPA-${idx}`]}
-                    </p>
-                  )}
+                {touched.institutionGPA && errors.institutionGPA && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center">
+                    <AlertCircle className="w-3 h-3 mr-1" />
+                    {errors.institutionGPA}
+                  </p>
+                )}
               </div>
             </div>
           </div>
-        ))}
-      </div>
-      <Button
-        type="button"
-        variant="outline"
-        className="text-cyan-800 border-cyan-800 hover:bg-cyan-50"
-        onClick={() =>
-          setPreviousEducations([
-            ...previousEducations,
-            {
-              institutionName: "",
-              institutionDegreeType: "",
-              institutionDegreeName: "",
-              institutionMajor: "",
-              institutionStartYear: "",
-              institutionEndYear: "",
-              institutionGPA: "",
-            },
-          ])
-        }
-      >
-        Add Another Previous Education
-      </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import PersonalInformationForm from "./form-steps/PersonalInformationForm";
@@ -97,6 +95,11 @@ const validationRules = {
     required: true,
     pattern: /^(19|20)\d{2}$/,
     message: "Please enter a valid year (e.g., 2020)",
+  },
+
+  currentEducationLevel: {
+    required: true,
+    message: "Please select your current education level",
   },
   institutionName: {
     required: false,
@@ -196,13 +199,28 @@ const validationRules = {
   },
 };
 
-// Enhanced validation function
+// Enhanced validation function with conditional requirements
 const validateField = (fieldName, value, formData = {}) => {
   const rules = validationRules[fieldName];
   if (!rules) return null;
 
+  // Check if this is a higher education field and if it should be required
+  const isUniversityEnrolled =
+    formData.currentEducationLevel === "university_enrolled";
+  const higherEducationFields = [
+    "institutionName",
+    "institutionDegreeType",
+    "institutionDegreeName",
+    "institutionMajor",
+    "institutionStartYear",
+  ];
+
+  const isFieldRequired =
+    rules.required ||
+    (isUniversityEnrolled && higherEducationFields.includes(fieldName));
+
   // Required field validation
-  if (rules.required && (!value || value.toString().trim() === "")) {
+  if (isFieldRequired && (!value || value.toString().trim() === "")) {
     return `${fieldName
       .replace(/([A-Z])/g, " $1")
       .replace(/^./, (str) => str.toUpperCase())} is required`;
@@ -425,6 +443,9 @@ export default function LearnerInformationForm() {
 
       highSchoolName: "",
       highSchoolMatricYear: "",
+
+      currentEducationLevel: "",
+
       institutionName: "",
       institutionDegreeType: "",
       institutionDegreeName: "",
@@ -433,7 +454,7 @@ export default function LearnerInformationForm() {
       institutionEndYear: "",
       institutionGPA: "",
 
-      numberOfMembers: "1",
+      numberOfMembers: "",
 
       parent1FirstName: "",
       parent1LastName: "",
@@ -488,88 +509,26 @@ export default function LearnerInformationForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [subjects, setSubjects] = useState([]);
   const [memberCount, setMemberCount] = useState(1);
+  const [stepCompletionStatus, setStepCompletionStatus] = useState([
+    false,
+    false,
+    false,
+    false,
+  ]);
 
-  // Save form data to localStorage whenever formData changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-    } catch (error) {
-      console.error("Error saving form data:", error);
-    }
-  }, [formData]);
+  const [previousEducations, setPreviousEducations] = useState([
+    {
+      institutionName: "",
+      institutionDegreeType: "",
+      institutionDegreeName: "",
+      institutionMajor: "",
+      institutionStartYear: "",
+      institutionEndYear: "",
+      institutionGPA: "",
+    },
+  ]);
 
-  // Save current step to localStorage whenever activeStep changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_STEP_KEY, activeStep.toString());
-    } catch (error) {
-      console.error("Error saving step:", error);
-    }
-  }, [activeStep]);
-
-  // Clear saved data when form is successfully submitted
-  const clearSavedData = () => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(STORAGE_STEP_KEY);
-    } catch (error) {
-      console.error("Error clearing saved data:", error);
-    }
-  };
-
-  const steps = [
-    { label: "Personal Information", shortLabel: "Personal Info" },
-    { label: "Education Information", shortLabel: "Education Info" },
-    { label: "Household Information", shortLabel: "Household Info" },
-    { label: "Required Documents", shortLabel: "Documents" },
-  ];
-
-  const handleAddMember = () => {
-    setMemberCount((prev) => prev + 1);
-  };
-
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-
-    // Real-time validation for touched fields
-    if (touched[id]) {
-      const fieldError = validateField(id, value, { ...formData, [id]: value });
-      setErrors((prev) => ({
-        ...prev,
-        [id]: fieldError,
-      }));
-    }
-  };
-
-  const handleSelectChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-
-    // Real-time validation for touched fields
-    if (touched[field]) {
-      const fieldError = validateField(field, value, {
-        ...formData,
-        [field]: value,
-      });
-      setErrors((prev) => ({
-        ...prev,
-        [field]: fieldError,
-      }));
-    }
-  };
-
-  const handleBlur = (field) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-
-    // Validate field on blur
-    const fieldError = validateField(field, formData[field], formData);
-    setErrors((prev) => ({
-      ...prev,
-      [field]: fieldError,
-    }));
-  };
-
-  // Enhanced validation functions
+  // Enhanced validation functions - moved before useEffect
   const validatePersonalInfo = () => {
     const newErrors = {};
     const personalFields = [
@@ -620,8 +579,44 @@ export default function LearnerInformationForm() {
       });
     }
 
-    // Validate higher education (if provided)
-    if (formData.institutionName) {
+    // Validate current education level
+    if (!formData.currentEducationLevel?.trim()) {
+      newErrors.currentEducationLevel = "Current education level is required";
+    }
+
+    // Validate higher education fields - conditionally required if university enrolled
+    const isUniversityEnrolled =
+      formData.currentEducationLevel === "university_enrolled";
+
+    if (isUniversityEnrolled) {
+      // These fields become required when university enrolled
+      const requiredHigherEdFields = [
+        "institutionName",
+        "institutionDegreeType",
+        "institutionDegreeName",
+        "institutionMajor",
+        "institutionStartYear",
+      ];
+
+      requiredHigherEdFields.forEach((field) => {
+        const error = validateField(field, formData[field], formData);
+        if (error) {
+          newErrors[field] = error;
+        }
+      });
+
+      // Optional fields for university students (still validate if provided)
+      const optionalHigherEdFields = ["institutionEndYear", "institutionGPA"];
+      optionalHigherEdFields.forEach((field) => {
+        if (formData[field]) {
+          const error = validateField(field, formData[field], formData);
+          if (error) {
+            newErrors[field] = error;
+          }
+        }
+      });
+    } else if (formData.institutionName) {
+      // If not university enrolled but institution name is provided, validate all higher ed fields
       const higherEdFields = [
         "institutionName",
         "institutionDegreeType",
@@ -709,6 +704,144 @@ export default function LearnerInformationForm() {
     return newErrors;
   };
 
+  const validateRequiredDocuments = () => {
+    const newErrors = {};
+
+    // Required documents
+    const requiredDocs = ["transcript", "nationalIdCard", "proofOfResidence"];
+
+    requiredDocs.forEach((docType) => {
+      const error = validateDocument(docType, documents[docType], true);
+      if (error) {
+        newErrors[docType] = error;
+      }
+    });
+
+    // Optional documents validation
+    const optionalDocs = [
+      "letterOfRecommendation",
+      "resume",
+      "coverLetter",
+      "payslip",
+    ];
+
+    optionalDocs.forEach((docType) => {
+      if (documents[docType] && documents[docType].uploaded) {
+        const error = validateDocument(docType, documents[docType], false);
+        if (error) {
+          newErrors[docType] = error;
+        }
+      }
+    });
+
+    // Additional documents validation
+    additionalDocs.forEach((doc, index) => {
+      if (doc) {
+        const error = validateDocument(
+          `additionalDoc${index}`,
+          { uploaded: true, file: doc },
+          false
+        );
+        if (error) {
+          newErrors[`additionalDoc${index}`] = error;
+        }
+      }
+    });
+
+    return newErrors;
+  };
+
+  // Save form data to localStorage whenever formData changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    } catch (error) {
+      console.error("Error saving form data:", error);
+    }
+  }, [formData]);
+
+  // Save current step to localStorage whenever activeStep changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_STEP_KEY, activeStep.toString());
+    } catch (error) {
+      console.error("Error saving step:", error);
+    }
+  }, [activeStep]);
+
+  // Update step completion status whenever form data changes
+  useEffect(() => {
+    const newCompletionStatus = [
+      Object.keys(validatePersonalInfo()).length === 0,
+      Object.keys(validateEducationInfo()).length === 0,
+      Object.keys(validateHouseholdInfo()).length === 0,
+      Object.keys(validateRequiredDocuments()).length === 0,
+    ];
+    setStepCompletionStatus(newCompletionStatus);
+  }, [formData, subjects, documents, additionalDocs]);
+
+  // Clear saved data when form is successfully submitted
+  const clearSavedData = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_STEP_KEY);
+    } catch (error) {
+      console.error("Error clearing saved data:", error);
+    }
+  };
+
+  const steps = [
+    { label: "Personal Information", shortLabel: "Personal Info" },
+    { label: "Education Information", shortLabel: "Education Info" },
+    { label: "Household Information", shortLabel: "Household Info" },
+    { label: "Required Documents", shortLabel: "Documents" },
+  ];
+
+  const handleAddMember = () => {
+    setMemberCount((prev) => prev + 1);
+  };
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+
+    // Real-time validation for touched fields
+    if (touched[id]) {
+      const fieldError = validateField(id, value, { ...formData, [id]: value });
+      setErrors((prev) => ({
+        ...prev,
+        [id]: fieldError,
+      }));
+    }
+  };
+
+  const handleSelectChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+    // Real-time validation for touched fields
+    if (touched[field]) {
+      const fieldError = validateField(field, value, {
+        ...formData,
+        [field]: value,
+      });
+      setErrors((prev) => ({
+        ...prev,
+        [field]: fieldError,
+      }));
+    }
+  };
+
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+
+    // Validate field on blur
+    const fieldError = validateField(field, formData[field], formData);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: fieldError,
+    }));
+  };
+
   const handleFileUpload = (docType, event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -775,53 +908,6 @@ export default function LearnerInformationForm() {
     });
   };
 
-  const validateRequiredDocuments = () => {
-    const newErrors = {};
-
-    // Required documents
-    const requiredDocs = ["transcript", "nationalIdCard", "proofOfResidence"];
-
-    requiredDocs.forEach((docType) => {
-      const error = validateDocument(docType, documents[docType], true);
-      if (error) {
-        newErrors[docType] = error;
-      }
-    });
-
-    // Optional documents validation
-    const optionalDocs = [
-      "letterOfRecommendation",
-      "resume",
-      "coverLetter",
-      "payslip",
-    ];
-
-    optionalDocs.forEach((docType) => {
-      if (documents[docType] && documents[docType].uploaded) {
-        const error = validateDocument(docType, documents[docType], false);
-        if (error) {
-          newErrors[docType] = error;
-        }
-      }
-    });
-
-    // Additional documents validation
-    additionalDocs.forEach((doc, index) => {
-      if (doc) {
-        const error = validateDocument(
-          `additionalDoc${index}`,
-          { uploaded: true, file: doc },
-          false
-        );
-        if (error) {
-          newErrors[`additionalDoc${index}`] = error;
-        }
-      }
-    });
-
-    return newErrors;
-  };
-
   const validateStep = () => {
     switch (activeStep) {
       case 0:
@@ -835,6 +921,48 @@ export default function LearnerInformationForm() {
       default:
         return {};
     }
+  };
+
+  // Function to find the first incomplete step
+  const findFirstIncompleteStep = () => {
+    const allValidations = [
+      validatePersonalInfo(),
+      validateEducationInfo(),
+      validateHouseholdInfo(),
+      validateRequiredDocuments(),
+    ];
+
+    for (let i = 0; i < allValidations.length; i++) {
+      if (Object.keys(allValidations[i]).length > 0) {
+        return i;
+      }
+    }
+    return -1; // All steps are complete
+  };
+
+  // Modified step navigation with validation check
+  const handleStepClick = (targetStep) => {
+    // Allow navigation to previous steps or current step
+    if (targetStep <= activeStep) {
+      setActiveStep(targetStep);
+      return;
+    }
+
+    // For forward navigation, check if all previous steps are complete
+    for (let i = 0; i < targetStep; i++) {
+      if (!stepCompletionStatus[i]) {
+        // Show error message and don't allow navigation
+        alert(
+          `Please complete step ${i + 1} (${
+            steps[i].label
+          }) before proceeding to step ${targetStep + 1}.`
+        );
+        return;
+      }
+    }
+
+    // If all previous steps are complete, allow navigation
+    setActiveStep(targetStep);
   };
 
   const handleNext = () => {
@@ -853,8 +981,16 @@ export default function LearnerInformationForm() {
   };
 
   const handleSubmit = () => {
-    const stepErrors = validateRequiredDocuments();
-    if (Object.keys(stepErrors).length === 0) {
+    // Validate all steps
+    const allErrors = {
+      ...validatePersonalInfo(),
+      ...validateEducationInfo(),
+      ...validateHouseholdInfo(),
+      ...validateRequiredDocuments(),
+    };
+
+    if (Object.keys(allErrors).length === 0) {
+      // All validations passed, proceed with submission
       console.log("Final form data on submit:", formData);
       console.log("Submitted documents:", documents);
       setIsSubmitting(true);
@@ -865,10 +1001,25 @@ export default function LearnerInformationForm() {
         clearSavedData();
       }, 1000);
     } else {
-      setErrors(stepErrors);
-      const touchedFields = {};
-      Object.keys(stepErrors).forEach((field) => (touchedFields[field] = true));
-      setTouched(touchedFields);
+      // Find the first step with errors and navigate to it
+      const firstIncompleteStep = findFirstIncompleteStep();
+
+      if (firstIncompleteStep !== -1) {
+        setActiveStep(firstIncompleteStep);
+
+        // Set all errors and touched fields for the incomplete step
+        setErrors(allErrors);
+        const touchedFields = {};
+        Object.keys(allErrors).forEach(
+          (field) => (touchedFields[field] = true)
+        );
+        setTouched(touchedFields);
+
+        // Show alert message
+        alert(
+          `Please complete all required fields in ${steps[firstIncompleteStep].label} before submitting.`
+        );
+      }
     }
   };
 
@@ -896,24 +1047,12 @@ export default function LearnerInformationForm() {
   const formProps = {
     formData,
     handleInputChange,
-    handleSelectChange, // Add this line
+    handleSelectChange,
     handleBlur,
     errors,
     touched,
-    validateField, // Pass validation function to child components
+    validateField,
   };
-
-  const [previousEducations, setPreviousEducations] = useState([
-    {
-      institutionName: "",
-      institutionDegreeType: "",
-      institutionDegreeName: "",
-      institutionMajor: "",
-      institutionStartYear: "",
-      institutionEndYear: "",
-      institutionGPA: "",
-    },
-  ]);
 
   const educationFormProps = {
     ...formProps,
@@ -921,7 +1060,7 @@ export default function LearnerInformationForm() {
     setSubjects,
     previousEducations,
     setPreviousEducations,
-    validateSubject, // Pass subject validation function
+    validateSubject,
   };
 
   if (isSubmitted) return <SuccessMessage />;
@@ -962,20 +1101,35 @@ export default function LearnerInformationForm() {
               <div
                 key={index}
                 className="flex flex-col items-center cursor-pointer group"
-                onClick={() => setActiveStep(index)}
+                onClick={() => handleStepClick(index)}
               >
                 {/* Circle indicator */}
                 <div
                   className={`
-                  w-12 h-12 rounded-full border-4 flex items-center justify-center text-sm font-semibold transition-all duration-300
+                  w-12 h-12 rounded-full border-4 flex items-center justify-center text-sm font-semibold transition-all duration-300 relative
                   ${
                     index <= activeStep
-                      ? "bg-cyan-600 border-cyan-600 text-white"
+                      ? stepCompletionStatus[index]
+                        ? "bg-cyan-800 border-cyan8600 text-white"
+                        : index === activeStep
+                        ? "bg-cyan-600 border-cyan-600 text-white"
+                        : "bg-yellow-500 border-yellow-500 text-white"
+                      : stepCompletionStatus[index]
+                      ? "bg-cyan-800 border-cyan-800 text-white"
                       : "bg-white border-gray-300 text-gray-500 group-hover:border-cyan-500"
+                  }
+                  ${
+                    // Disable pointer events for future steps that can't be accessed
+                    index > activeStep &&
+                    !stepCompletionStatus
+                      .slice(0, index)
+                      .every((status) => status)
+                      ? "cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
                   }
                 `}
                 >
-                  {index < activeStep ? (
+                  {stepCompletionStatus[index] ? (
                     <svg
                       className="w-6 h-6"
                       fill="none"
@@ -992,6 +1146,13 @@ export default function LearnerInformationForm() {
                   ) : (
                     <span>{index + 1}</span>
                   )}
+
+                  {/* Warning indicator for incomplete required steps */}
+                  {index < activeStep && !stepCompletionStatus[index] && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs">!</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Step label */}
@@ -1005,6 +1166,13 @@ export default function LearnerInformationForm() {
                     <span className="hidden sm:inline">{step.label}</span>
                     <span className="sm:hidden">{step.shortLabel}</span>
                   </div>
+                  {/* Completion status indicator */}
+                  {stepCompletionStatus[index] && (
+                    <div className="text-xs text-green-600 mt-1">Complete</div>
+                  )}
+                  {index <= activeStep && !stepCompletionStatus[index] && (
+                    <div className="text-xs text-red-600 mt-1">Incomplete</div>
+                  )}
                 </div>
               </div>
             ))}
