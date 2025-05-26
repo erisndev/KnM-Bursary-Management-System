@@ -17,7 +17,7 @@ export default function ContactInfo({ data }) {
       <CardHeader className="bg-gray-50">
         <CardTitle className="text-lg">Contact Information</CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
         <div>
           <p className="text-sm font-medium text-gray-500">Email Address:</p>
           <p className="text-gray-900">{data.email}</p>

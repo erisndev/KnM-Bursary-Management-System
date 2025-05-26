@@ -15,7 +15,7 @@ export default function SupportingDocuments({ documents }) {
       <CardHeader className="bg-gray-50">
         <CardTitle className="text-lg">Supporting Documents</CardTitle>
       </CardHeader>
-      <CardContent className="pt-6 space-y-4">
+      <CardContent className="pt-2 space-y-4">
         {documentList.map((doc) => (
           <div
             key={doc.key}

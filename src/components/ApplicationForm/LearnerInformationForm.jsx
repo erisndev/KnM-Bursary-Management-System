@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import PersonalInformationForm from "./form-steps/PersonalInformationForm";
 import EducationInformationForm from "./form-steps/EducationInformationForm";
@@ -8,6 +10,392 @@ import SuccessMessage from "./form-steps/SuccessMessage";
 
 const STORAGE_KEY = "bursary_form_data";
 const STORAGE_STEP_KEY = "bursary_form_step";
+
+// Comprehensive validation rules
+const validationRules = {
+  // Personal Information
+  fullName: {
+    required: true,
+    minLength: 2,
+    maxLength: 100,
+    pattern: /^[a-zA-Z\s'-]+$/,
+    message:
+      "Full name must contain only letters, spaces, hyphens, and apostrophes",
+  },
+  email: {
+    required: true,
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    maxLength: 254,
+    message: "Please enter a valid email address",
+  },
+  phone: {
+    required: true,
+    pattern: /^0\d{2}[\s-]?\d{3}[\s-]?\d{4}$/,
+    minLength: 10,
+    maxLength: 10,
+    message: "Please enter a valid phone number",
+  },
+  dob: {
+    required: true,
+    message: "Date of birth is required",
+  },
+  gender: {
+    required: true,
+    message: "Please select your gender",
+  },
+  nationality: {
+    required: true,
+    minLength: 2,
+    maxLength: 50,
+    pattern: /^[a-zA-Z\s]+$/,
+    message: "Nationality must contain only letters and spaces",
+  },
+  country: {
+    required: true,
+    message: "Please select your country of residence",
+  },
+  address1: {
+    required: true,
+    minLength: 5,
+    maxLength: 200,
+    message: "Address must be between 5 and 200 characters",
+  },
+  city: {
+    required: true,
+    minLength: 2,
+    maxLength: 100,
+    pattern: /^[a-zA-Z\s'-]+$/,
+    message:
+      "City name must contain only letters, spaces, hyphens, and apostrophes",
+  },
+  state: {
+    required: true,
+    minLength: 2,
+    maxLength: 100,
+    pattern: /^[a-zA-Z\s'-]+$/,
+    message:
+      "State/Province must contain only letters, spaces, hyphens, and apostrophes",
+  },
+  postalCode: {
+    required: true,
+    minLength: 4,
+    maxLength: 4,
+    pattern: /^[a-zA-Z0-9\s-]+$/,
+    message: "Please enter a valid postal code",
+  },
+
+  // Education Information
+  highSchoolName: {
+    required: true,
+    minLength: 2,
+    maxLength: 200,
+    pattern: /^[a-zA-Z0-9\s'.-]+$/,
+    message:
+      "School name must contain only letters, numbers, spaces, and basic punctuation",
+  },
+  highSchoolMatricYear: {
+    required: true,
+    pattern: /^(19|20)\d{2}$/,
+    message: "Please enter a valid year (e.g., 2020)",
+  },
+  institutionName: {
+    required: false,
+    minLength: 2,
+    maxLength: 200,
+    pattern: /^[a-zA-Z0-9\s'.-]+$/,
+    message:
+      "Institution name must contain only letters, numbers, spaces, and basic punctuation",
+  },
+  institutionDegreeType: {
+    required: false,
+    message: "Please select a degree type",
+  },
+  institutionDegreeName: {
+    required: false,
+    minLength: 2,
+    maxLength: 200,
+    pattern: /^[a-zA-Z0-9\s'.-]+$/,
+    message:
+      "Degree name must contain only letters, numbers, spaces, and basic punctuation",
+  },
+  institutionMajor: {
+    required: false,
+    minLength: 2,
+    maxLength: 100,
+    pattern: /^[a-zA-Z\s'-]+$/,
+    message:
+      "Major must contain only letters, spaces, hyphens, and apostrophes",
+  },
+  institutionStartYear: {
+    required: false,
+    pattern: /^(19|20)\d{2}$/,
+    message: "Please enter a valid year (e.g., 2020)",
+  },
+  institutionEndYear: {
+    required: false,
+    pattern: /^(19|20)\d{2}$/,
+    message: "Please enter a valid year (e.g., 2024)",
+  },
+  institutionGPA: {
+    required: false,
+    pattern: /^[0-4](\.\d{1,2})?$/,
+    message: "GPA must be between 0.00 and 4.00",
+  },
+
+  // Household Information
+  numberOfMembers: {
+    required: true,
+    pattern: /^[1-9]\d*$/,
+    message: "Number of members must be a positive number",
+  },
+  parent1FirstName: {
+    required: true,
+    minLength: 2,
+    maxLength: 50,
+    pattern: /^[a-zA-Z\s'-]+$/,
+    message:
+      "First name must contain only letters, spaces, hyphens, and apostrophes",
+  },
+  parent1LastName: {
+    required: true,
+    minLength: 2,
+    maxLength: 50,
+    pattern: /^[a-zA-Z\s'-]+$/,
+    message:
+      "Last name must contain only letters, spaces, hyphens, and apostrophes",
+  },
+  parent1Gender: {
+    required: true,
+    message: "Please select gender",
+  },
+  parent1Relationship: {
+    required: true,
+    message: "Please select relationship",
+  },
+  parent1EmploymentStatus: {
+    required: true,
+    message: "Please select employment status",
+  },
+  parent1Occupation: {
+    required: false,
+    minLength: 2,
+    maxLength: 100,
+    pattern: /^[a-zA-Z\s'-]+$/,
+    message:
+      "Occupation must contain only letters, spaces, hyphens, and apostrophes",
+  },
+  parent1MonthlyIncome: {
+    required: false,
+    pattern: /^\d+(\.\d{1,2})?$/,
+    message: "Monthly income must be a valid amount (e.g., 5000.00)",
+  },
+  parent1OtherIncome: {
+    required: false,
+    pattern: /^\d+(\.\d{1,2})?$/,
+    message: "Other income must be a valid amount (e.g., 1000.00)",
+  },
+};
+
+// Enhanced validation function
+const validateField = (fieldName, value, formData = {}) => {
+  const rules = validationRules[fieldName];
+  if (!rules) return null;
+
+  // Required field validation
+  if (rules.required && (!value || value.toString().trim() === "")) {
+    return `${fieldName
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase())} is required`;
+  }
+
+  // Skip other validations if field is empty and not required
+  if (!value || value.toString().trim() === "") {
+    return null;
+  }
+
+  const stringValue = value.toString().trim();
+
+  // Length validations
+  if (rules.minLength && stringValue.length < rules.minLength) {
+    return `Must be at least ${rules.minLength} characters`;
+  }
+
+  if (rules.maxLength && stringValue.length > rules.maxLength) {
+    return `Must not exceed ${rules.maxLength} characters`;
+  }
+
+  // Pattern validation
+  if (rules.pattern && !rules.pattern.test(stringValue)) {
+    return rules.message;
+  }
+
+  // Special validations
+  switch (fieldName) {
+    case "dob": {
+      const birthDate = new Date(value);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+
+      if (birthDate > today) {
+        return "Date of birth cannot be in the future";
+      }
+      if (age < 16) {
+        return "You must be at least 16 years old";
+      }
+      if (age > 100) {
+        return "Please enter a valid date of birth";
+      }
+      break;
+    }
+
+    case "email": {
+      const emailParts = stringValue.split("@");
+      if (emailParts.length !== 2) {
+        return "Please enter a valid email address";
+      }
+      const [localPart, domain] = emailParts;
+      if (localPart.length > 64 || domain.length > 253) {
+        return "Email address format is invalid";
+      }
+      break;
+    }
+
+    case "phone": {
+      const digitsOnly = stringValue.replace(/\D/g, "");
+      if (digitsOnly.length < 10 || digitsOnly.length > 15) {
+        return "Phone number must be between 10 and 15 digits";
+      }
+      break;
+    }
+
+    case "institutionEndYear": {
+      if (formData.institutionStartYear && value) {
+        const startYear = Number.parseInt(formData.institutionStartYear);
+        const endYear = Number.parseInt(value);
+        if (endYear < startYear) {
+          return "End year must be after start year";
+        }
+        if (endYear - startYear > 10) {
+          return "Duration cannot exceed 10 years";
+        }
+      }
+      break;
+    }
+
+    case "highSchoolMatricYear": {
+      const currentYear = new Date().getFullYear();
+      const matricYear = Number.parseInt(value);
+      if (matricYear > currentYear) {
+        return "Matric year cannot be in the future";
+      }
+      if (matricYear < currentYear - 50) {
+        return "Please enter a valid matric year";
+      }
+      break;
+    }
+
+    case "institutionGPA": {
+      const gpa = Number.parseFloat(value);
+      if (gpa < 0 || gpa > 4) {
+        return "GPA must be between 0.00 and 4.00";
+      }
+      break;
+    }
+
+    case "numberOfMembers": {
+      const members = Number.parseInt(value);
+      if (members < 1 || members > 20) {
+        return "Number of members must be between 1 and 20";
+      }
+      break;
+    }
+
+    case "parent1MonthlyIncome":
+    case "parent1OtherIncome": {
+      const income = Number.parseFloat(value);
+      if (income < 0) {
+        return "Income cannot be negative";
+      }
+      if (income > 1000000) {
+        return "Please enter a reasonable income amount";
+      }
+      break;
+    }
+  }
+
+  return null;
+};
+
+// Subject validation
+const validateSubject = (subject, index) => {
+  const errors = {};
+
+  if (!subject.name || !subject.name.trim()) {
+    errors.name = `Subject name is required for subject #${index + 1}`;
+  } else if (subject.name.length < 2 || subject.name.length > 100) {
+    errors.name = `Subject name must be between 2 and 100 characters`;
+  } else if (!/^[a-zA-Z\s'-]+$/.test(subject.name)) {
+    errors.name = `Subject name must contain only letters, spaces, hyphens, and apostrophes`;
+  }
+
+  if (
+    subject.grade === undefined ||
+    subject.grade === null ||
+    subject.grade.toString().trim() === ""
+  ) {
+    errors.grade = `Grade is required for subject #${index + 1}`;
+  } else {
+    const gradeNum = Number(subject.grade);
+    if (
+      isNaN(gradeNum) ||
+      gradeNum < 0 ||
+      gradeNum > 100 ||
+      !/^\d{1,3}(\.\d{1,2})?$/.test(subject.grade.toString())
+    ) {
+      errors.grade = `Please enter a valid percentage (0-100)`;
+    }
+  }
+
+  return errors;
+};
+
+// Document validation
+const validateDocument = (docType, document, isRequired = true) => {
+  if (isRequired && (!document || !document.uploaded)) {
+    return `${docType
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase())} is required`;
+  }
+
+  if (document && document.file) {
+    const file = document.file;
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ];
+
+    if (file.size > maxSize) {
+      return "File size must be less than 10MB";
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      return "File must be PDF, JPEG, or PNG format";
+    }
+  }
+
+  return null;
+};
 
 export default function LearnerInformationForm() {
   // Load initial data from localStorage or use defaults
@@ -64,14 +452,6 @@ export default function LearnerInformationForm() {
       parent2Occupation: "",
       parent2OtherIncome: "",
       parent2MonthlyIncome: "",
-
-      member1FirstName: "",
-      member1LastName: "",
-      member1Gender: "",
-      member1Relationship: "",
-      member1EmploymentStatus: "",
-      member1Occupation: "",
-      member1MonthlyIncome: "",
     };
   };
 
@@ -80,7 +460,7 @@ export default function LearnerInformationForm() {
     try {
       const saved = localStorage.getItem(STORAGE_STEP_KEY);
       if (saved) {
-        return parseInt(saved, 10);
+        return Number.parseInt(saved, 10);
       }
     } catch (error) {
       console.error("Error loading saved step:", error);
@@ -151,89 +531,209 @@ export default function LearnerInformationForm() {
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
+
+    // Real-time validation for touched fields
+    if (touched[id]) {
+      const fieldError = validateField(id, value, { ...formData, [id]: value });
+      setErrors((prev) => ({
+        ...prev,
+        [id]: fieldError,
+      }));
+    }
   };
 
   const handleSelectChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+
+    // Real-time validation for touched fields
+    if (touched[field]) {
+      const fieldError = validateField(field, value, {
+        ...formData,
+        [field]: value,
+      });
+      setErrors((prev) => ({
+        ...prev,
+        [field]: fieldError,
+      }));
+    }
   };
 
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
+
+    // Validate field on blur
+    const fieldError = validateField(field, formData[field], formData);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: fieldError,
+    }));
   };
 
+  // Enhanced validation functions
   const validatePersonalInfo = () => {
     const newErrors = {};
-    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "Invalid email";
-    if (!formData.phone.trim()) newErrors.phone = "Phone is required";
-    if (!formData.dob.trim()) newErrors.dob = "Date of birth is required";
-    if (!formData.nationality.trim())
-      newErrors.nationality = "Nationality is required";
-    if (!formData.country.trim()) newErrors.country = "Country is required";
-    if (!formData.gender.trim()) newErrors.gender = "Gender is required";
-    if (!formData.address1.trim()) newErrors.address1 = "Address is required";
-    if (!formData.city.trim()) newErrors.city = "City is required";
-    if (!formData.state.trim()) newErrors.state = "State is required";
-    if (!formData.postalCode.trim())
-      newErrors.postalCode = "Postal code is required";
+    const personalFields = [
+      "fullName",
+      "email",
+      "phone",
+      "dob",
+      "gender",
+      "nationality",
+      "country",
+      "address1",
+      "city",
+      "state",
+      "postalCode",
+    ];
+
+    personalFields.forEach((field) => {
+      const error = validateField(field, formData[field], formData);
+      if (error) {
+        newErrors[field] = error;
+      }
+    });
+
     return newErrors;
   };
 
   const validateEducationInfo = () => {
     const newErrors = {};
 
-    if (!formData.highSchoolName.trim())
-      newErrors.highSchoolName = "High school name required";
-    if (!formData.highSchoolMatricYear.trim()) {
-      newErrors.highSchoolMatricYear = "Matric year required";
-    } else if (isNaN(Number(formData.highSchoolMatricYear))) {
-      newErrors.highSchoolMatricYear = "Matric year must be a valid number";
-    }
+    // Validate high school information
+    const educationFields = ["highSchoolName", "highSchoolMatricYear"];
+    educationFields.forEach((field) => {
+      const error = validateField(field, formData[field], formData);
+      if (error) {
+        newErrors[field] = error;
+      }
+    });
 
+    // Validate subjects
     if (!subjects.length) {
       newErrors.subjects = "At least one subject is required";
     } else {
       subjects.forEach((subject, index) => {
-        if (!subject.name || !subject.name.trim()) {
-          newErrors[
-            `subjects.${index}.name`
-          ] = `Subject name is required for subject #${index + 1}`;
-        }
-        if (!subject.grade || !subject.grade.trim()) {
-          newErrors[
-            `subjects.${index}.grade`
-          ] = `Grade is required for subject #${index + 1}`;
+        const subjectErrors = validateSubject(subject, index);
+        Object.keys(subjectErrors).forEach((key) => {
+          newErrors[`subjects.${index}.${key}`] = subjectErrors[key];
+        });
+      });
+    }
+
+    // Validate higher education (if provided)
+    if (formData.institutionName) {
+      const higherEdFields = [
+        "institutionName",
+        "institutionDegreeType",
+        "institutionDegreeName",
+        "institutionMajor",
+        "institutionStartYear",
+        "institutionEndYear",
+        "institutionGPA",
+      ];
+      higherEdFields.forEach((field) => {
+        const error = validateField(field, formData[field], formData);
+        if (error) {
+          newErrors[field] = error;
         }
       });
     }
-    console.log("Education validation errors:", newErrors);
+
     return newErrors;
   };
 
   const validateHouseholdInfo = () => {
     const newErrors = {};
-    if (!formData.numberOfMembers.trim())
-      newErrors.numberOfMembers = "Number of members required";
-    if (!formData.parent1FirstName.trim())
-      newErrors.parent1FirstName = "Parent 1 first name required";
-    if (!formData.parent1LastName.trim())
-      newErrors.parent1LastName = "Parent 1 last name required";
-    if (!formData.parent1Relationship.trim())
-      newErrors.parent1Relationship = "Relationship required";
-    if (!formData.parent1EmploymentStatus.trim())
-      newErrors.parent1EmploymentStatus = "Employment status required";
+
+    // Validate household size
+    const error = validateField(
+      "numberOfMembers",
+      formData.numberOfMembers,
+      formData
+    );
+    if (error) {
+      newErrors.numberOfMembers = error;
+    }
+
+    // Validate parent 1 information (required)
+    const parent1Fields = [
+      "parent1FirstName",
+      "parent1LastName",
+      "parent1Gender",
+      "parent1Relationship",
+      "parent1EmploymentStatus",
+    ];
+
+    parent1Fields.forEach((field) => {
+      const error = validateField(field, formData[field], formData);
+      if (error) {
+        newErrors[field] = error;
+      }
+    });
+
+    // Validate optional parent 1 fields
+    const parent1OptionalFields = [
+      "parent1Occupation",
+      "parent1MonthlyIncome",
+      "parent1OtherIncome",
+    ];
+    parent1OptionalFields.forEach((field) => {
+      if (formData[field]) {
+        const error = validateField(field, formData[field], formData);
+        if (error) {
+          newErrors[field] = error;
+        }
+      }
+    });
+
+    // Validate parent 2 information (if provided)
+    if (formData.parent2FirstName || formData.parent2LastName) {
+      const parent2Fields = [
+        "parent2FirstName",
+        "parent2LastName",
+        "parent2Gender",
+        "parent2Relationship",
+        "parent2EmploymentStatus",
+      ];
+
+      parent2Fields.forEach((field) => {
+        if (formData[field]) {
+          const error = validateField(field, formData[field], formData);
+          if (error) {
+            newErrors[field] = error;
+          }
+        }
+      });
+    }
+
     return newErrors;
   };
 
   const handleFileUpload = (docType, event) => {
     const file = event.target.files[0];
     if (!file) return;
+
+    // Validate file
+    const error = validateDocument(docType, { uploaded: true, file }, true);
+    if (error) {
+      setErrors((prev) => ({
+        ...prev,
+        [docType]: error,
+      }));
+      return;
+    }
+
     setDocuments((prev) => ({
       ...prev,
       [docType]: { uploaded: true, file },
     }));
+
+    // Clear any previous errors for this document
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[docType];
+      return newErrors;
+    });
   };
 
   const handleFileRemove = (docType) => {
@@ -246,23 +746,79 @@ export default function LearnerInformationForm() {
   const handleAdditionalDocUpload = (index, event) => {
     const file = event.target.files[0];
     if (!file) return;
+
+    // Validate file
+    const error = validateDocument(
+      `additionalDoc${index}`,
+      { uploaded: true, file },
+      false
+    );
+    if (error) {
+      setErrors((prev) => ({
+        ...prev,
+        [`additionalDoc${index}`]: error,
+      }));
+      return;
+    }
+
     setAdditionalDocs((prev) => {
       const updated = [...prev];
       updated[index] = file;
       return updated;
     });
+
+    // Clear any previous errors for this document
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[`additionalDoc${index}`];
+      return newErrors;
+    });
   };
 
   const validateRequiredDocuments = () => {
     const newErrors = {};
+
     // Required documents
-    if (!documents.transcript.uploaded)
-      newErrors.transcript = "Transcript is required";
-    if (!documents.nationalIdCard.uploaded)
-      newErrors.nationalIdCard = "Proof of identification is required";
-    if (!documents.proofOfResidence.uploaded)
-      newErrors.proofOfResidence = "Proof of residence is required";
-    // Add more required docs as needed
+    const requiredDocs = ["transcript", "nationalIdCard", "proofOfResidence"];
+
+    requiredDocs.forEach((docType) => {
+      const error = validateDocument(docType, documents[docType], true);
+      if (error) {
+        newErrors[docType] = error;
+      }
+    });
+
+    // Optional documents validation
+    const optionalDocs = [
+      "letterOfRecommendation",
+      "resume",
+      "coverLetter",
+      "payslip",
+    ];
+
+    optionalDocs.forEach((docType) => {
+      if (documents[docType] && documents[docType].uploaded) {
+        const error = validateDocument(docType, documents[docType], false);
+        if (error) {
+          newErrors[docType] = error;
+        }
+      }
+    });
+
+    // Additional documents validation
+    additionalDocs.forEach((doc, index) => {
+      if (doc) {
+        const error = validateDocument(
+          `additionalDoc${index}`,
+          { uploaded: true, file: doc },
+          false
+        );
+        if (error) {
+          newErrors[`additionalDoc${index}`] = error;
+        }
+      }
+    });
+
     return newErrors;
   };
 
@@ -288,6 +844,7 @@ export default function LearnerInformationForm() {
       setTouched({});
       if (activeStep < 3) setActiveStep(activeStep + 1);
     } else {
+      console.log("Validation errors for step:", stepErrors);
       setErrors(stepErrors);
       const touchedFields = {};
       Object.keys(stepErrors).forEach((field) => (touchedFields[field] = true));
@@ -339,9 +896,11 @@ export default function LearnerInformationForm() {
   const formProps = {
     formData,
     handleInputChange,
+    handleSelectChange, // Add this line
     handleBlur,
     errors,
     touched,
+    validateField, // Pass validation function to child components
   };
 
   const [previousEducations, setPreviousEducations] = useState([
@@ -362,6 +921,7 @@ export default function LearnerInformationForm() {
     setSubjects,
     previousEducations,
     setPreviousEducations,
+    validateSubject, // Pass subject validation function
   };
 
   if (isSubmitted) return <SuccessMessage />;
@@ -453,7 +1013,9 @@ export default function LearnerInformationForm() {
       </div>
 
       <div>
-        {activeStep === 0 && <PersonalInformationForm {...formProps} />}
+        {activeStep === 0 && (
+          <PersonalInformationForm {...formProps} onFormChange={setFormData} />
+        )}
         {activeStep === 1 && (
           <EducationInformationForm {...educationFormProps} />
         )}

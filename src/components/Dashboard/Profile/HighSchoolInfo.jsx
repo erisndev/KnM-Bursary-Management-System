@@ -6,7 +6,7 @@ export default function HighSchoolInfo({ data }) {
       <CardHeader className="bg-gray-50">
         <CardTitle className="text-lg">High School Information</CardTitle>
       </CardHeader>
-      <CardContent className="pt-6">
+      <CardContent className="pt-2">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <p className="text-sm font-medium text-gray-500">School Name:</p>
