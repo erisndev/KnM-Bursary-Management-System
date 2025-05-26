@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "../ui/button";
 import PersonalInformationForm from "./form-steps/PersonalInformationForm";
 import EducationInformationForm from "./form-steps/EducationInformationForm";
@@ -6,12 +6,40 @@ import HouseholdInformationForm from "./form-steps/HouseholdInformationForm";
 import RequiredDocumentsForm from "./form-steps/RequiredDocumentsForm";
 import SuccessMessage from "./form-steps/SuccessMessage";
 
-const STORAGE_KEY = "bursary_form_data";
-const STORAGE_STEP_KEY = "bursary_form_step";
+// ============================================================================
+// CONSTANTS & CONFIGURATION
+// ============================================================================
 
-// Comprehensive validation rules
-const validationRules = {
-  // Personal Information
+/** Local storage keys for form persistence */
+const STORAGE_KEYS = {
+  FORM_DATA: "bursary_form_data",
+  CURRENT_STEP: "bursary_form_step",
+};
+
+/** Form step configuration */
+const FORM_STEPS = [
+  { label: "Personal Information", shortLabel: "Personal Info" },
+  { label: "Education Information", shortLabel: "Education Info" },
+  { label: "Household Information", shortLabel: "Household Info" },
+  { label: "Required Documents", shortLabel: "Documents" },
+];
+
+/** File upload constraints */
+const FILE_CONSTRAINTS = {
+  MAX_SIZE: 10 * 1024 * 1024, // 10MB
+  ALLOWED_TYPES: ["application/pdf", "image/jpeg", "image/png", "image/jpg"],
+};
+
+// ============================================================================
+// VALIDATION RULES & SCHEMAS
+// ============================================================================
+
+/**
+ * Comprehensive validation rules for all form fields
+ * Each rule defines requirements, patterns, and error messages
+ */
+const VALIDATION_RULES = {
+  // Personal Information Fields
   fullName: {
     required: true,
     minLength: 2,
@@ -82,7 +110,7 @@ const validationRules = {
     message: "Please enter a valid postal code",
   },
 
-  // Education Information
+  // Education Information Fields
   highSchoolName: {
     required: true,
     minLength: 2,
@@ -96,13 +124,14 @@ const validationRules = {
     pattern: /^(19|20)\d{2}$/,
     message: "Please enter a valid year (e.g., 2020)",
   },
-
   currentEducationLevel: {
     required: true,
     message: "Please select your current education level",
   },
+
+  // Higher Education Fields (conditionally required)
   institutionName: {
-    required: false,
+    required: false, // Becomes required if university enrolled
     minLength: 2,
     maxLength: 200,
     pattern: /^[a-zA-Z0-9\s'.-]+$/,
@@ -110,11 +139,11 @@ const validationRules = {
       "Institution name must contain only letters, numbers, spaces, and basic punctuation",
   },
   institutionDegreeType: {
-    required: false,
+    required: false, // Becomes required if university enrolled
     message: "Please select a degree type",
   },
   institutionDegreeName: {
-    required: false,
+    required: false, // Becomes required if university enrolled
     minLength: 2,
     maxLength: 200,
     pattern: /^[a-zA-Z0-9\s'.-]+$/,
@@ -122,7 +151,7 @@ const validationRules = {
       "Degree name must contain only letters, numbers, spaces, and basic punctuation",
   },
   institutionMajor: {
-    required: false,
+    required: false, // Becomes required if university enrolled
     minLength: 2,
     maxLength: 100,
     pattern: /^[a-zA-Z\s'-]+$/,
@@ -130,7 +159,7 @@ const validationRules = {
       "Major must contain only letters, spaces, hyphens, and apostrophes",
   },
   institutionStartYear: {
-    required: false,
+    required: false, // Becomes required if university enrolled
     pattern: /^(19|20)\d{2}$/,
     message: "Please enter a valid year (e.g., 2020)",
   },
@@ -145,7 +174,7 @@ const validationRules = {
     message: "GPA must be between 0.00 and 4.00",
   },
 
-  // Household Information
+  // Household Information Fields
   numberOfMembers: {
     required: true,
     pattern: /^[1-9]\d*$/,
@@ -199,12 +228,22 @@ const validationRules = {
   },
 };
 
-// Enhanced validation function with conditional requirements
+// ============================================================================
+// VALIDATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Validates a single form field based on its validation rules
+ * @param {string} fieldName - The name of the field to validate
+ * @param {any} value - The current value of the field
+ * @param {Object} formData - The complete form data (for conditional validation)
+ * @returns {string|null} Error message string or null if valid
+ */
 const validateField = (fieldName, value, formData = {}) => {
-  const rules = validationRules[fieldName];
+  const rules = VALIDATION_RULES[fieldName];
   if (!rules) return null;
 
-  // Check if this is a higher education field and if it should be required
+  // Check if this field should be required based on conditional logic
   const isUniversityEnrolled =
     formData.currentEducationLevel === "university_enrolled";
   const higherEducationFields = [
@@ -247,7 +286,20 @@ const validateField = (fieldName, value, formData = {}) => {
     return rules.message;
   }
 
-  // Special validations
+  // Special field-specific validations
+  return validateSpecialFields(fieldName, value, formData);
+};
+
+/**
+ * Handles special validation cases that require custom logic
+ * @param {string} fieldName - The field being validated
+ * @param {any} value - The field value
+ * @param {Object} formData - Complete form data for cross-field validation
+ * @returns {string|null} Error message or null
+ */
+const validateSpecialFields = (fieldName, value, formData) => {
+  const stringValue = value.toString().trim();
+
   switch (fieldName) {
     case "dob": {
       const birthDate = new Date(value);
@@ -262,23 +314,16 @@ const validateField = (fieldName, value, formData = {}) => {
         age--;
       }
 
-      if (birthDate > today) {
-        return "Date of birth cannot be in the future";
-      }
-      if (age < 16) {
-        return "You must be at least 16 years old";
-      }
-      if (age > 100) {
-        return "Please enter a valid date of birth";
-      }
+      if (birthDate > today) return "Date of birth cannot be in the future";
+      if (age < 16) return "You must be at least 16 years old";
+      if (age > 100) return "Please enter a valid date of birth";
       break;
     }
 
     case "email": {
       const emailParts = stringValue.split("@");
-      if (emailParts.length !== 2) {
-        return "Please enter a valid email address";
-      }
+      if (emailParts.length !== 2) return "Please enter a valid email address";
+
       const [localPart, domain] = emailParts;
       if (localPart.length > 64 || domain.length > 253) {
         return "Email address format is invalid";
@@ -298,12 +343,8 @@ const validateField = (fieldName, value, formData = {}) => {
       if (formData.institutionStartYear && value) {
         const startYear = Number.parseInt(formData.institutionStartYear);
         const endYear = Number.parseInt(value);
-        if (endYear < startYear) {
-          return "End year must be after start year";
-        }
-        if (endYear - startYear > 10) {
-          return "Duration cannot exceed 10 years";
-        }
+        if (endYear < startYear) return "End year must be after start year";
+        if (endYear - startYear > 10) return "Duration cannot exceed 10 years";
       }
       break;
     }
@@ -311,40 +352,31 @@ const validateField = (fieldName, value, formData = {}) => {
     case "highSchoolMatricYear": {
       const currentYear = new Date().getFullYear();
       const matricYear = Number.parseInt(value);
-      if (matricYear > currentYear) {
+      if (matricYear > currentYear)
         return "Matric year cannot be in the future";
-      }
-      if (matricYear < currentYear - 50) {
+      if (matricYear < currentYear - 50)
         return "Please enter a valid matric year";
-      }
       break;
     }
 
     case "institutionGPA": {
       const gpa = Number.parseFloat(value);
-      if (gpa < 0 || gpa > 4) {
-        return "GPA must be between 0.00 and 4.00";
-      }
+      if (gpa < 0 || gpa > 4) return "GPA must be between 0.00 and 4.00";
       break;
     }
 
     case "numberOfMembers": {
       const members = Number.parseInt(value);
-      if (members < 1 || members > 20) {
+      if (members < 1 || members > 20)
         return "Number of members must be between 1 and 20";
-      }
       break;
     }
 
     case "parent1MonthlyIncome":
     case "parent1OtherIncome": {
       const income = Number.parseFloat(value);
-      if (income < 0) {
-        return "Income cannot be negative";
-      }
-      if (income > 1000000) {
-        return "Please enter a reasonable income amount";
-      }
+      if (income < 0) return "Income cannot be negative";
+      if (income > 1000000) return "Please enter a reasonable income amount";
       break;
     }
   }
@@ -352,18 +384,26 @@ const validateField = (fieldName, value, formData = {}) => {
   return null;
 };
 
-// Subject validation
+/**
+ * Validates subject entries for education section
+ * @param {Object} subject - Subject object with name and grade
+ * @param {number} index - Index of the subject in the array
+ * @returns {Object} Object with validation errors
+ */
 const validateSubject = (subject, index) => {
   const errors = {};
 
+  // Validate subject name
   if (!subject.name || !subject.name.trim()) {
     errors.name = `Subject name is required for subject #${index + 1}`;
   } else if (subject.name.length < 2 || subject.name.length > 100) {
-    errors.name = `Subject name must be between 2 and 100 characters`;
+    errors.name = "Subject name must be between 2 and 100 characters";
   } else if (!/^[a-zA-Z\s'-]+$/.test(subject.name)) {
-    errors.name = `Subject name must contain only letters, spaces, hyphens, and apostrophes`;
+    errors.name =
+      "Subject name must contain only letters, spaces, hyphens, and apostrophes";
   }
 
+  // Validate grade
   if (
     subject.grade === undefined ||
     subject.grade === null ||
@@ -378,14 +418,20 @@ const validateSubject = (subject, index) => {
       gradeNum > 100 ||
       !/^\d{1,3}(\.\d{1,2})?$/.test(subject.grade.toString())
     ) {
-      errors.grade = `Please enter a valid percentage (0-100)`;
+      errors.grade = "Please enter a valid percentage (0-100)";
     }
   }
 
   return errors;
 };
 
-// Document validation
+/**
+ * Validates uploaded documents
+ * @param {string} docType - Type of document being validated
+ * @param {Object} document - Document object with file information
+ * @param {boolean} isRequired - Whether this document is required
+ * @returns {string|null} Error message or null
+ */
 const validateDocument = (docType, document, isRequired = true) => {
   if (isRequired && (!document || !document.uploaded)) {
     return `${docType
@@ -395,19 +441,12 @@ const validateDocument = (docType, document, isRequired = true) => {
 
   if (document && document.file) {
     const file = document.file;
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    const allowedTypes = [
-      "application/pdf",
-      "image/jpeg",
-      "image/png",
-      "image/jpg",
-    ];
 
-    if (file.size > maxSize) {
+    if (file.size > FILE_CONSTRAINTS.MAX_SIZE) {
       return "File size must be less than 10MB";
     }
 
-    if (!allowedTypes.includes(file.type)) {
+    if (!FILE_CONSTRAINTS.ALLOWED_TYPES.includes(file.type)) {
       return "File must be PDF, JPEG, or PNG format";
     }
   }
@@ -415,83 +454,128 @@ const validateDocument = (docType, document, isRequired = true) => {
   return null;
 };
 
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Creates the initial form data structure with empty values
+ * @returns {Object} Default form data object
+ */
+const createInitialFormData = () => ({
+  // Personal Information
+  fullName: "",
+  email: "",
+  phone: "",
+  dob: "",
+  gender: "",
+  nationality: "",
+  country: "",
+  address1: "",
+  address2: "",
+  city: "",
+  state: "",
+  postalCode: "",
+
+  // Education Information
+  highSchoolName: "",
+  highSchoolMatricYear: "",
+  currentEducationLevel: "",
+
+  // Higher Education Information
+  institutionName: "",
+  institutionDegreeType: "",
+  institutionDegreeName: "",
+  institutionMajor: "",
+  institutionStartYear: "",
+  institutionEndYear: "",
+  institutionGPA: "",
+
+  // Household Information
+  numberOfMembers: "",
+
+  // Parent 1 Information
+  parent1FirstName: "",
+  parent1LastName: "",
+  parent1Gender: "",
+  parent1Relationship: "",
+  parent1EmploymentStatus: "",
+  parent1Occupation: "",
+  parent1MonthlyIncome: "",
+  parent1OtherIncome: "",
+
+  // Parent 2 Information (Optional)
+  parent2FirstName: "",
+  parent2LastName: "",
+  parent2Gender: "",
+  parent2Relationship: "",
+  parent2EmploymentStatus: "",
+  parent2Occupation: "",
+  parent2MonthlyIncome: "",
+  parent2OtherIncome: "",
+});
+
+/**
+ * Safely loads data from localStorage with error handling
+ * @param {string} key - Storage key to load from
+ * @param {any} defaultValue - Default value if loading fails
+ * @returns {any} Parsed data or default value
+ */
+const loadFromStorage = (key, defaultValue) => {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : defaultValue;
+  } catch (error) {
+    console.error(`Error loading ${key} from localStorage:`, error);
+    return defaultValue;
+  }
+};
+
+/**
+ * Safely saves data to localStorage with error handling
+ * @param {string} key - Storage key to save to
+ * @param {any} data - Data to save
+ */
+const saveToStorage = (key, data) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (error) {
+    console.error(`Error saving ${key} to localStorage:`, error);
+  }
+};
+
+/**
+ * Clears all form data from localStorage
+ */
+const clearStoredData = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.FORM_DATA);
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_STEP);
+  } catch (error) {
+    console.error("Error clearing stored data:", error);
+  }
+};
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 export default function LearnerInformationForm() {
-  // Load initial data from localStorage or use defaults
-  const loadInitialData = () => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (error) {
-      console.error("Error loading saved form data:", error);
-    }
+  // ========================================
+  // STATE MANAGEMENT
+  // ========================================
 
-    return {
-      fullName: "",
-      email: "",
-      phone: "",
-      dob: "",
-      gender: "",
-      nationality: "",
-      country: "",
-      address1: "",
-      address2: "",
-      city: "",
-      state: "",
-      postalCode: "",
+  /** Current active step (0-3) */
+  const [activeStep, setActiveStep] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.CURRENT_STEP, 0)
+  );
 
-      highSchoolName: "",
-      highSchoolMatricYear: "",
+  /** Main form data object */
+  const [formData, setFormData] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.FORM_DATA, createInitialFormData())
+  );
 
-      currentEducationLevel: "",
-
-      institutionName: "",
-      institutionDegreeType: "",
-      institutionDegreeName: "",
-      institutionMajor: "",
-      institutionStartYear: "",
-      institutionEndYear: "",
-      institutionGPA: "",
-
-      numberOfMembers: "",
-
-      parent1FirstName: "",
-      parent1LastName: "",
-      parent1Gender: "",
-      parent1Relationship: "",
-      parent1EmploymentStatus: "",
-      parent1Occupation: "",
-      parent1OtherIncome: "",
-      parent1MonthlyIncome: "",
-
-      parent2FirstName: "",
-      parent2LastName: "",
-      parent2Gender: "",
-      parent2Relationship: "",
-      parent2EmploymentStatus: "",
-      parent2Occupation: "",
-      parent2OtherIncome: "",
-      parent2MonthlyIncome: "",
-    };
-  };
-
-  // Load initial step from localStorage or use default
-  const loadInitialStep = () => {
-    try {
-      const saved = localStorage.getItem(STORAGE_STEP_KEY);
-      if (saved) {
-        return Number.parseInt(saved, 10);
-      }
-    } catch (error) {
-      console.error("Error loading saved step:", error);
-    }
-    return 0;
-  };
-
-  const [activeStep, setActiveStep] = useState(loadInitialStep);
-  const [formData, setFormData] = useState(loadInitialData);
-
+  /** Document upload states */
   const [documents, setDocuments] = useState({
     transcript: {},
     nationalIdCard: {},
@@ -501,14 +585,23 @@ export default function LearnerInformationForm() {
     coverLetter: {},
     payslip: {},
   });
+
+  /** Additional documents array */
   const [additionalDocs, setAdditionalDocs] = useState([]);
 
+  /** Form validation states */
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+
+  /** Form submission states */
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  /** Education-specific states */
   const [subjects, setSubjects] = useState([]);
   const [memberCount, setMemberCount] = useState(1);
+
+  /** Step completion tracking */
   const [stepCompletionStatus, setStepCompletionStatus] = useState([
     false,
     false,
@@ -516,6 +609,7 @@ export default function LearnerInformationForm() {
     false,
   ]);
 
+  /** Previous education entries (for multiple institutions) */
   const [previousEducations, setPreviousEducations] = useState([
     {
       institutionName: "",
@@ -528,7 +622,14 @@ export default function LearnerInformationForm() {
     },
   ]);
 
-  // Enhanced validation functions - moved before useEffect
+  // ========================================
+  // VALIDATION FUNCTIONS BY STEP
+  // ========================================
+
+  /**
+   * Validates all personal information fields
+   * @returns {Object} Object containing validation errors
+   */
   const validatePersonalInfo = () => {
     const newErrors = {};
     const personalFields = [
@@ -555,10 +656,14 @@ export default function LearnerInformationForm() {
     return newErrors;
   };
 
+  /**
+   * Validates all education information fields including subjects
+   * @returns {Object} Object containing validation errors
+   */
   const validateEducationInfo = () => {
     const newErrors = {};
 
-    // Validate high school information
+    // Validate basic education fields
     const educationFields = ["highSchoolName", "highSchoolMatricYear"];
     educationFields.forEach((field) => {
       const error = validateField(field, formData[field], formData);
@@ -567,7 +672,7 @@ export default function LearnerInformationForm() {
       }
     });
 
-    // Validate subjects
+    // Validate subjects array
     if (!subjects.length) {
       newErrors.subjects = "At least one subject is required";
     } else {
@@ -584,12 +689,11 @@ export default function LearnerInformationForm() {
       newErrors.currentEducationLevel = "Current education level is required";
     }
 
-    // Validate higher education fields - conditionally required if university enrolled
+    // Validate higher education fields (conditionally required)
     const isUniversityEnrolled =
       formData.currentEducationLevel === "university_enrolled";
 
     if (isUniversityEnrolled) {
-      // These fields become required when university enrolled
       const requiredHigherEdFields = [
         "institutionName",
         "institutionDegreeType",
@@ -605,7 +709,7 @@ export default function LearnerInformationForm() {
         }
       });
 
-      // Optional fields for university students (still validate if provided)
+      // Optional fields for university students (validate if provided)
       const optionalHigherEdFields = ["institutionEndYear", "institutionGPA"];
       optionalHigherEdFields.forEach((field) => {
         if (formData[field]) {
@@ -616,7 +720,7 @@ export default function LearnerInformationForm() {
         }
       });
     } else if (formData.institutionName) {
-      // If not university enrolled but institution name is provided, validate all higher ed fields
+      // If institution name provided but not university enrolled, validate all higher ed fields
       const higherEdFields = [
         "institutionName",
         "institutionDegreeType",
@@ -637,6 +741,10 @@ export default function LearnerInformationForm() {
     return newErrors;
   };
 
+  /**
+   * Validates all household information fields
+   * @returns {Object} Object containing validation errors
+   */
   const validateHouseholdInfo = () => {
     const newErrors = {};
 
@@ -650,8 +758,8 @@ export default function LearnerInformationForm() {
       newErrors.numberOfMembers = error;
     }
 
-    // Validate parent 1 information (required)
-    const parent1Fields = [
+    // Validate required parent 1 fields
+    const parent1RequiredFields = [
       "parent1FirstName",
       "parent1LastName",
       "parent1Gender",
@@ -659,14 +767,14 @@ export default function LearnerInformationForm() {
       "parent1EmploymentStatus",
     ];
 
-    parent1Fields.forEach((field) => {
+    parent1RequiredFields.forEach((field) => {
       const error = validateField(field, formData[field], formData);
       if (error) {
         newErrors[field] = error;
       }
     });
 
-    // Validate optional parent 1 fields
+    // Validate optional parent 1 fields (if provided)
     const parent1OptionalFields = [
       "parent1Occupation",
       "parent1MonthlyIncome",
@@ -681,7 +789,7 @@ export default function LearnerInformationForm() {
       }
     });
 
-    // Validate parent 2 information (if provided)
+    // Validate parent 2 fields (if any parent 2 information is provided)
     if (formData.parent2FirstName || formData.parent2LastName) {
       const parent2Fields = [
         "parent2FirstName",
@@ -704,12 +812,15 @@ export default function LearnerInformationForm() {
     return newErrors;
   };
 
+  /**
+   * Validates all required and optional documents
+   * @returns {Object} Object containing validation errors
+   */
   const validateRequiredDocuments = () => {
     const newErrors = {};
 
     // Required documents
     const requiredDocs = ["transcript", "nationalIdCard", "proofOfResidence"];
-
     requiredDocs.forEach((docType) => {
       const error = validateDocument(docType, documents[docType], true);
       if (error) {
@@ -717,17 +828,17 @@ export default function LearnerInformationForm() {
       }
     });
 
-    // Optional documents validation
+    // Optional documents (validate if uploaded)
     const optionalDocs = [
       "letterOfRecommendation",
       "resume",
       "coverLetter",
       "payslip",
     ];
-
     optionalDocs.forEach((docType) => {
-      if (documents[docType] && documents[docType].uploaded) {
-        const error = validateDocument(docType, documents[docType], false);
+      const doc = documents[docType];
+      if (doc && doc.uploaded) {
+        const error = validateDocument(docType, doc, false);
         if (error) {
           newErrors[docType] = error;
         }
@@ -751,56 +862,75 @@ export default function LearnerInformationForm() {
     return newErrors;
   };
 
-  // Save form data to localStorage whenever formData changes
+  // ========================================
+  // SIDE EFFECTS & PERSISTENCE
+  // ========================================
+
+  /** Save form data to localStorage whenever it changes */
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-    } catch (error) {
-      console.error("Error saving form data:", error);
-    }
+    saveToStorage(STORAGE_KEYS.FORM_DATA, formData);
   }, [formData]);
 
-  // Save current step to localStorage whenever activeStep changes
+  /** Save current step to localStorage whenever it changes */
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_STEP_KEY, activeStep.toString());
-    } catch (error) {
-      console.error("Error saving step:", error);
-    }
+    saveToStorage(STORAGE_KEYS.CURRENT_STEP, activeStep);
   }, [activeStep]);
 
-  // Update step completion status whenever form data changes
+  // Memoize validation functions to avoid re-creating them on each render
+  // Memoized validation functions for each step.
+  // These use useCallback to avoid unnecessary re-creation on each render,
+  // and ensure that dependencies are tracked correctly for useEffect and other hooks.
+
+  // Memoized personal info validation (depends on formData)
+  const validatePersonalInfoCallback = useCallback(validatePersonalInfo, [
+    formData,
+  ]);
+
+  // Memoized education info validation (depends on formData and subjects)
+  const validateEducationInfoCallback = useCallback(validateEducationInfo, [
+    formData,
+    subjects,
+  ]);
+
+  // Memoized household info validation (depends on formData)
+  const validateHouseholdInfoCallback = useCallback(validateHouseholdInfo, [
+    formData,
+  ]);
+
+  // Memoized required documents validation (depends on documents and additionalDocs)
+  const validateRequiredDocumentsCallback = useCallback(
+    validateRequiredDocuments,
+    [documents, additionalDocs]
+  );
+
+  /** Update step completion status when form data changes */
   useEffect(() => {
     const newCompletionStatus = [
-      Object.keys(validatePersonalInfo()).length === 0,
-      Object.keys(validateEducationInfo()).length === 0,
-      Object.keys(validateHouseholdInfo()).length === 0,
-      Object.keys(validateRequiredDocuments()).length === 0,
+      Object.keys(validatePersonalInfoCallback()).length === 0,
+      Object.keys(validateEducationInfoCallback()).length === 0,
+      Object.keys(validateHouseholdInfoCallback()).length === 0,
+      Object.keys(validateRequiredDocumentsCallback()).length === 0,
     ];
     setStepCompletionStatus(newCompletionStatus);
-  }, [formData, subjects, documents, additionalDocs]);
+  }, [
+    formData,
+    subjects,
+    documents,
+    additionalDocs,
+    validatePersonalInfoCallback,
+    validateEducationInfoCallback,
+    validateHouseholdInfoCallback,
+    validateRequiredDocumentsCallback,
+  ]);
 
-  // Clear saved data when form is successfully submitted
-  const clearSavedData = () => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(STORAGE_STEP_KEY);
-    } catch (error) {
-      console.error("Error clearing saved data:", error);
-    }
-  };
+  // ========================================
+  // EVENT HANDLERS
+  // ========================================
 
-  const steps = [
-    { label: "Personal Information", shortLabel: "Personal Info" },
-    { label: "Education Information", shortLabel: "Education Info" },
-    { label: "Household Information", shortLabel: "Household Info" },
-    { label: "Required Documents", shortLabel: "Documents" },
-  ];
-
-  const handleAddMember = () => {
-    setMemberCount((prev) => prev + 1);
-  };
-
+  /**
+   * Handles input field changes with real-time validation
+   * @param {Event} e - Input change event
+   */
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -810,11 +940,16 @@ export default function LearnerInformationForm() {
       const fieldError = validateField(id, value, { ...formData, [id]: value });
       setErrors((prev) => ({
         ...prev,
-        [id]: fieldError,
+        [id]: fieldError || "",
       }));
     }
   };
 
+  /**
+   * Handles select field changes with real-time validation
+   * @param {string} field - Field name
+   * @param {string} value - Selected value
+   */
   const handleSelectChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
@@ -826,11 +961,15 @@ export default function LearnerInformationForm() {
       });
       setErrors((prev) => ({
         ...prev,
-        [field]: fieldError,
+        [field]: fieldError || "",
       }));
     }
   };
 
+  /**
+   * Handles field blur events to trigger validation
+   * @param {string} field - Field name that lost focus
+   */
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
 
@@ -838,30 +977,33 @@ export default function LearnerInformationForm() {
     const fieldError = validateField(field, formData[field], formData);
     setErrors((prev) => ({
       ...prev,
-      [field]: fieldError,
+      [field]: fieldError || "",
     }));
   };
 
+  /**
+   * Handles file uploads with validation
+   * @param {string} docType - Document type being uploaded
+   * @param {Event} event - File input change event
+   */
   const handleFileUpload = (docType, event) => {
-    const file = event.target.files[0];
+    const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file
+    // Validate file before accepting
     const error = validateDocument(docType, { uploaded: true, file }, true);
     if (error) {
-      setErrors((prev) => ({
-        ...prev,
-        [docType]: error,
-      }));
+      setErrors((prev) => ({ ...prev, [docType]: error }));
       return;
     }
 
+    // Update documents state
     setDocuments((prev) => ({
       ...prev,
       [docType]: { uploaded: true, file },
     }));
 
-    // Clear any previous errors for this document
+    // Clear any previous errors
     setErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[docType];
@@ -869,6 +1011,10 @@ export default function LearnerInformationForm() {
     });
   };
 
+  /**
+   * Handles file removal
+   * @param {string} docType - Document type to remove
+   */
   const handleFileRemove = (docType) => {
     setDocuments((prev) => ({
       ...prev,
@@ -876,8 +1022,13 @@ export default function LearnerInformationForm() {
     }));
   };
 
+  /**
+   * Handles additional document uploads
+   * @param {number} index - Index in additional docs array
+   * @param {Event} event - File input change event
+   */
   const handleAdditionalDocUpload = (index, event) => {
-    const file = event.target.files[0];
+    const file = event.target.files?.[0];
     if (!file) return;
 
     // Validate file
@@ -887,20 +1038,18 @@ export default function LearnerInformationForm() {
       false
     );
     if (error) {
-      setErrors((prev) => ({
-        ...prev,
-        [`additionalDoc${index}`]: error,
-      }));
+      setErrors((prev) => ({ ...prev, [`additionalDoc${index}`]: error }));
       return;
     }
 
+    // Update additional docs array
     setAdditionalDocs((prev) => {
       const updated = [...prev];
       updated[index] = file;
       return updated;
     });
 
-    // Clear any previous errors for this document
+    // Clear errors
     setErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[`additionalDoc${index}`];
@@ -908,7 +1057,22 @@ export default function LearnerInformationForm() {
     });
   };
 
-  const validateStep = () => {
+  /**
+   * Adds a new household member
+   */
+  const handleAddMember = () => {
+    setMemberCount((prev) => prev + 1);
+  };
+
+  // ========================================
+  // NAVIGATION HANDLERS
+  // ========================================
+
+  /**
+   * Validates the current step
+   * @returns {Object} Validation errors for current step
+   */
+  const validateCurrentStep = () => {
     switch (activeStep) {
       case 0:
         return validatePersonalInfo();
@@ -923,7 +1087,10 @@ export default function LearnerInformationForm() {
     }
   };
 
-  // Function to find the first incomplete step
+  /**
+   * Finds the first step with validation errors
+   * @returns {number} Step index or -1 if all complete
+   */
   const findFirstIncompleteStep = () => {
     const allValidations = [
       validatePersonalInfo(),
@@ -937,10 +1104,13 @@ export default function LearnerInformationForm() {
         return i;
       }
     }
-    return -1; // All steps are complete
+    return -1; // All steps complete
   };
 
-  // Modified step navigation with validation check
+  /**
+   * Handles step navigation with validation checks
+   * @param {number} targetStep - Step to navigate to
+   */
   const handleStepClick = (targetStep) => {
     // Allow navigation to previous steps or current step
     if (targetStep <= activeStep) {
@@ -951,35 +1121,52 @@ export default function LearnerInformationForm() {
     // For forward navigation, check if all previous steps are complete
     for (let i = 0; i < targetStep; i++) {
       if (!stepCompletionStatus[i]) {
-        // Show error message and don't allow navigation
         alert(
           `Please complete step ${i + 1} (${
-            steps[i].label
+            FORM_STEPS[i].label
           }) before proceeding to step ${targetStep + 1}.`
         );
         return;
       }
     }
 
-    // If all previous steps are complete, allow navigation
+    // Allow navigation if all previous steps are complete
     setActiveStep(targetStep);
   };
 
+  /**
+   * Handles next button click with validation
+   */
   const handleNext = () => {
-    const stepErrors = validateStep();
+    const stepErrors = validateCurrentStep();
+
     if (Object.keys(stepErrors).length === 0) {
+      // Clear errors and move to next step
       setErrors({});
       setTouched({});
       if (activeStep < 3) setActiveStep(activeStep + 1);
     } else {
+      // Show validation errors
       console.log("Validation errors for step:", stepErrors);
       setErrors(stepErrors);
+
+      // Mark all error fields as touched
       const touchedFields = {};
       Object.keys(stepErrors).forEach((field) => (touchedFields[field] = true));
       setTouched(touchedFields);
     }
   };
 
+  /**
+   * Handles previous button click
+   */
+  const handlePrevious = () => {
+    if (activeStep > 0) setActiveStep(activeStep - 1);
+  };
+
+  /**
+   * Handles form submission with comprehensive validation
+   */
   const handleSubmit = () => {
     // Validate all steps
     const allErrors = {
@@ -990,24 +1177,26 @@ export default function LearnerInformationForm() {
     };
 
     if (Object.keys(allErrors).length === 0) {
-      // All validations passed, proceed with submission
+      // All validations passed - proceed with submission
       console.log("Final form data on submit:", formData);
       console.log("Submitted documents:", documents);
+
       setIsSubmitting(true);
+
+      // Simulate API call
       setTimeout(() => {
         setIsSubmitting(false);
         setIsSubmitted(true);
-        // Clear saved data after successful submission
-        clearSavedData();
+        clearStoredData(); // Clear saved data after successful submission
       }, 1000);
     } else {
-      // Find the first step with errors and navigate to it
+      // Find first incomplete step and navigate to it
       const firstIncompleteStep = findFirstIncompleteStep();
 
       if (firstIncompleteStep !== -1) {
         setActiveStep(firstIncompleteStep);
 
-        // Set all errors and touched fields for the incomplete step
+        // Set all errors and mark fields as touched
         setErrors(allErrors);
         const touchedFields = {};
         Object.keys(allErrors).forEach(
@@ -1015,36 +1204,49 @@ export default function LearnerInformationForm() {
         );
         setTouched(touchedFields);
 
-        // Show alert message
+        // Show user-friendly error message
         alert(
-          `Please complete all required fields in ${steps[firstIncompleteStep].label} before submitting.`
+          `Please complete all required fields in ${FORM_STEPS[firstIncompleteStep].label} before submitting.`
         );
       }
     }
   };
 
-  const handlePrevious = () => {
-    if (activeStep > 0) setActiveStep(activeStep - 1);
-  };
-
-  // Add a function to manually clear the form (optional)
+  /**
+   * Handles form reset with confirmation
+   */
   const handleClearForm = () => {
     if (
       window.confirm(
         "Are you sure you want to clear all form data? This cannot be undone."
       )
     ) {
-      clearSavedData();
-      setFormData(loadInitialData());
+      clearStoredData();
+      setFormData(createInitialFormData());
       setActiveStep(0);
       setSubjects([]);
       setMemberCount(1);
       setErrors({});
       setTouched({});
+      setDocuments({
+        transcript: {},
+        nationalIdCard: {},
+        proofOfResidence: {},
+        letterOfRecommendation: {},
+        resume: {},
+        coverLetter: {},
+        payslip: {},
+      });
+      setAdditionalDocs([]);
     }
   };
 
-  const formProps = {
+  // ========================================
+  // FORM PROPS PREPARATION
+  // ========================================
+
+  /** Common props passed to all form step components */
+  const commonFormProps = {
     formData,
     handleInputChange,
     handleSelectChange,
@@ -1054,25 +1256,33 @@ export default function LearnerInformationForm() {
     validateField,
   };
 
+  /** Extended props for education form component */
   const educationFormProps = {
-    ...formProps,
+    ...commonFormProps,
     subjects,
     setSubjects,
     previousEducations,
     setPreviousEducations,
     validateSubject,
+    setTouched, // Add setTouched for education form
   };
 
+  // ========================================
+  // RENDER
+  // ========================================
+
+  // Show success message if form has been submitted
   if (isSubmitted) return <SuccessMessage />;
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4 sm:p-6 bg-gray-100 rounded shadow-md">
+      {/* Header Section */}
       <div className="flex justify-between items-center mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-semibold text-cyan-800 text-center flex-1">
           Bursary Application Form
         </h1>
 
-        {/* Optional: Add a clear form button */}
+        {/* Clear Form Button */}
         <button
           onClick={handleClearForm}
           className="text-sm text-red-600 hover:text-red-800 underline"
@@ -1082,54 +1292,57 @@ export default function LearnerInformationForm() {
         </button>
       </div>
 
-      {/* Progress Bar */}
+      {/* Progress Bar Section */}
       <div className="mb-8 sm:mb-12">
-        {/* Progress Bar Track */}
         <div className="relative">
-          {/* Background line */}
-          <div className="absolute top-6 left-0 w-full h-1 bg-gray-300 rounded-full"></div>
+          {/* Background Progress Line */}
+          <div className="absolute top-6 left-0 w-full h-1 bg-gray-300 rounded-full" />
 
-          {/* Progress line */}
+          {/* Active Progress Line */}
           <div
             className="absolute top-6 left-0 h-1 bg-cyan-600 rounded-full transition-all duration-300 ease-in-out"
-            style={{ width: `${(activeStep / (steps.length - 1)) * 100}%` }}
-          ></div>
+            style={{
+              width: `${(activeStep / (FORM_STEPS.length - 1)) * 100}%`,
+            }}
+          />
 
-          {/* Step indicators */}
+          {/* Step Indicators */}
           <div className="relative flex justify-between">
-            {steps.map((step, index) => (
+            {FORM_STEPS.map((step, index) => (
               <div
                 key={index}
                 className="flex flex-col items-center cursor-pointer group"
                 onClick={() => handleStepClick(index)}
               >
-                {/* Circle indicator */}
+                {/* Step Circle */}
                 <div
                   className={`
-                  w-12 h-12 rounded-full border-4 flex items-center justify-center text-sm font-semibold transition-all duration-300 relative
-                  ${
-                    index <= activeStep
-                      ? stepCompletionStatus[index]
-                        ? "bg-cyan-800 border-cyan8600 text-white"
-                        : index === activeStep
-                        ? "bg-cyan-600 border-cyan-600 text-white"
-                        : "bg-yellow-500 border-yellow-500 text-white"
-                      : stepCompletionStatus[index]
-                      ? "bg-cyan-800 border-cyan-800 text-white"
-                      : "bg-white border-gray-300 text-gray-500 group-hover:border-cyan-500"
-                  }
-                  ${
-                    // Disable pointer events for future steps that can't be accessed
-                    index > activeStep &&
-                    !stepCompletionStatus
-                      .slice(0, index)
-                      .every((status) => status)
-                      ? "cursor-not-allowed opacity-50"
-                      : "cursor-pointer"
-                  }
-                `}
+                    w-12 h-12 rounded-full border-4 flex items-center justify-center text-sm font-semibold 
+                    transition-all duration-300 relative
+                    ${
+                      index <= activeStep
+                        ? stepCompletionStatus[index]
+                          ? "bg-green-600 border-green-600 text-white" // Completed
+                          : index === activeStep
+                          ? "bg-cyan-600 border-cyan-600 text-white" // Current
+                          : "bg-yellow-500 border-yellow-500 text-white" // Incomplete but accessible
+                        : stepCompletionStatus[index]
+                        ? "bg-green-600 border-green-600 text-white" // Completed future step
+                        : "bg-white border-gray-300 text-gray-500 group-hover:border-cyan-500" // Future step
+                    }
+                    ${
+                      // Disable future steps that can't be accessed
+                      index > activeStep &&
+                      !stepCompletionStatus
+                        .slice(0, index)
+                        .every((status) => status)
+                        ? "cursor-not-allowed opacity-50"
+                        : "cursor-pointer"
+                    }
+                  `}
                 >
                   {stepCompletionStatus[index] ? (
+                    // Checkmark for completed steps
                     <svg
                       className="w-6 h-6"
                       fill="none"
@@ -1144,6 +1357,7 @@ export default function LearnerInformationForm() {
                       />
                     </svg>
                   ) : (
+                    // Step number
                     <span>{index + 1}</span>
                   )}
 
@@ -1155,18 +1369,21 @@ export default function LearnerInformationForm() {
                   )}
                 </div>
 
-                {/* Step label */}
+                {/* Step Label */}
                 <div className="mt-3 text-center">
                   <div
                     className={`
-                    text-sm font-medium transition-colors duration-300
-                    ${index === activeStep ? "text-cyan-700" : "text-gray-500"}
-                  `}
+                      text-sm font-medium transition-colors duration-300
+                      ${
+                        index === activeStep ? "text-cyan-700" : "text-gray-500"
+                      }
+                    `}
                   >
                     <span className="hidden sm:inline">{step.label}</span>
                     <span className="sm:hidden">{step.shortLabel}</span>
                   </div>
-                  {/* Completion status indicator */}
+
+                  {/* Completion Status */}
                   {stepCompletionStatus[index] && (
                     <div className="text-xs text-green-600 mt-1">Complete</div>
                   )}
@@ -1180,16 +1397,20 @@ export default function LearnerInformationForm() {
         </div>
       </div>
 
+      {/* Form Content Section */}
       <div>
         {activeStep === 0 && (
-          <PersonalInformationForm {...formProps} onFormChange={setFormData} />
+          <PersonalInformationForm
+            {...commonFormProps}
+            onFormChange={setFormData}
+          />
         )}
         {activeStep === 1 && (
           <EducationInformationForm {...educationFormProps} />
         )}
         {activeStep === 2 && (
           <HouseholdInformationForm
-            {...formProps}
+            {...commonFormProps}
             handleSelectChange={handleSelectChange}
             memberCount={memberCount}
             handleAddMember={handleAddMember}
@@ -1208,6 +1429,7 @@ export default function LearnerInformationForm() {
         )}
       </div>
 
+      {/* Navigation Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 mt-10 sm:mt-16">
         <Button
           className="bg-gray-200 text-md w-full sm:w-[200px] text-black border-gray-500"
