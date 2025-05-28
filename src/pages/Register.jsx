@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -10,6 +10,7 @@ const Register = () => {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const validate = () => {
     const newErrors = {};
@@ -46,6 +47,7 @@ const Register = () => {
     if (Object.keys(validationErrors).length === 0) {
       console.log("Register Form submitted:", form);
       alert("Registration successful!");
+      navigate("/dashboard");
     }
   };
 
@@ -169,6 +171,7 @@ const Register = () => {
               )}
             </div>
             <button
+              onClick={handleSubmit}
               type="submit"
               className="w-full bg-cyan-700 text-white py-2 rounded hover:bg-cyan-600 transition cursor-pointer"
             >

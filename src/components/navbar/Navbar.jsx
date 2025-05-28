@@ -11,7 +11,7 @@ const Navbar = () => {
   // 🔧 DEMO: Change this value to test different authentication states
   // Set to `true` to show "Log Out" button
   // Set to `false` to show "Log In" button
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // 👈 CHANGE THIS FOR DEMO
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 👈 CHANGE THIS FOR DEMO
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -95,7 +95,7 @@ const Navbar = () => {
             ) : (
               <Link to="/login" onClick={() => setIsOpen(false)}>
                 <button
-                  className="cursor-pointer border border-cyan-800 text-cyan-800 bg-white hover:bg-cyan-50 px-6 py-2 rounded-md"
+                  className="cursor-pointer bg-cyan-800 hover:bg-cyan-700 px-6 py-2 rounded-md text-white"
                   onClick={handleLogin}
                 >
                   Log In

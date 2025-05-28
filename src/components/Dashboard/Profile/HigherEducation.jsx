@@ -20,6 +20,14 @@ export default function HigherEducation({ data }) {
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
         <div>
+          <p className="text-sm font-medium text-gray-500">
+            Current Education Level:
+          </p>
+          <p className="text-gray-900">
+            {data.currentEducationLevel || "Not provided"}
+          </p>
+        </div>
+        <div>
           <p className="text-sm font-medium text-gray-500">Institution Name:</p>
           <p className="text-gray-900">
             {data.institutionName || "Not provided"}
