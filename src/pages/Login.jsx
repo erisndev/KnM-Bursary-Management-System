@@ -42,6 +42,7 @@ const Login = () => {
       const res = await fetch(`${baseAPI}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(form),
       });
       const data = await res.json();
