@@ -13,7 +13,11 @@ export default function PersonalInfo({ data }) {
         </div>
         <div>
           <p className="text-sm font-medium text-gray-500">Date of Birth:</p>
-          <p className="text-gray-900">{data.dob}</p>
+          <p className="text-gray-900">
+            {data.dob
+              ? new Date(data.dob).toISOString().slice(0, 10)
+              : "Not provided"}
+          </p>
         </div>
         <div>
           <p className="text-sm font-medium text-gray-500">Gender:</p>

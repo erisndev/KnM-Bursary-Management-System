@@ -35,7 +35,7 @@ export default function HighSchoolInfo({ data }) {
                 {data.subjects.map((item, index) => (
                   <tr key={index}>
                     <td className="px-6 py-4 text-sm text-gray-900">
-                      {item.subject}
+                      {item.name}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
                       {item.grade}
@@ -47,6 +47,14 @@ export default function HighSchoolInfo({ data }) {
           ) : (
             <p className="text-gray-500 italic">No subjects added</p>
           )}
+        </div>
+        <div className="mt-6">
+          <p className="text-sm font-medium text-gray-500">
+            Current Education Level:
+          </p>
+          <p className="text-gray-900">
+            {data.currentEducationLevel || "Not provided"}
+          </p>
         </div>
       </CardContent>
     </Card>

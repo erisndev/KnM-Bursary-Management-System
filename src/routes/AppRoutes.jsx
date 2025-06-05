@@ -7,6 +7,8 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Contact from "../pages/Contact";
 import MainLayout from "@/Layouts/MainLayout";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import ForgotPasswordFlow from "@/components/forgotPassword/ForgotPasswordFlow";
 
 const AppRoutes = () => {
   return (
@@ -22,17 +24,21 @@ const AppRoutes = () => {
       <Route
         path="/apply"
         element={
-          <MainLayout>
-            <ApplicationForm />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <ApplicationForm />
+            </MainLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/dashboard"
         element={
-          <MainLayout>
-            <Dashboard />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
+          </ProtectedRoute>
         }
       />
       <Route
@@ -60,6 +66,7 @@ const AppRoutes = () => {
           </MainLayout>
         }
       />
+      <Route path="/forgot-password" element={<ForgotPasswordFlow />} />
     </Routes>
   );
 };

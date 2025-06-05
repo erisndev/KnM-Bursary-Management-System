@@ -1,17 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HiMenu } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoIosLogOut } from "react-icons/io";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
-
-  // 🔧 DEMO: Change this value to test different authentication states
-  // Set to `true` to show "Log Out" button
-  // Set to `false` to show "Log In" button
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 👈 CHANGE THIS FOR DEMO
+  const navigate = useNavigate();
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -20,25 +18,41 @@ const Navbar = () => {
     { to: "/contact", label: "Contact Us" },
   ];
 
+  // Check authentication status on component mount and when location changes
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(!!token); // Convert to boolean
+    };
+
+    checkAuthStatus();
+
+    // Listen for storage changes (in case user logs in/out in another tab)
+    window.addEventListener("storage", checkAuthStatus);
+
+    return () => {
+      window.removeEventListener("storage", checkAuthStatus);
+    };
+  }, [location]);
+
   const getLinkClass = (path) =>
     location.pathname === path
       ? "text-cyan-800 font-semibold"
       : "text-gray-700 hover:text-cyan-800";
 
-  // 🔧 DEMO: Logout handler - replace with your actual logout logic
+  // Real logout handler
   const handleLogout = () => {
+    localStorage.removeItem("token");
     setIsLoggedIn(false);
-    // 👇 ADD YOUR ACTUAL LOGOUT LOGIC HERE
-    // Example: clear tokens, redirect, call API, etc.
+    localStorage.removeItem("user");
+
     console.log("User logged out");
+    toast.success("Logout successful!");
+    navigate("/login");
   };
 
-  // 🔧 DEMO: Login handler - replace with your actual login logic
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    // 👇 ADD YOUR ACTUAL LOGIN LOGIC HERE
-    // Example: redirect to login page, open modal, etc.
-    console.log("User logged in");
+  const handleLoginRedirect = () => {
+    navigate("/login");
   };
 
   return (
@@ -80,30 +94,32 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* 🔧 CONDITIONAL RENDERING: Shows logout if logged in, login if not */}
+            {/* Conditional rendering based on real auth state */}
             {isLoggedIn ? (
               <button
                 onClick={() => {
                   handleLogout();
                   setIsOpen(false);
                 }}
-                className="cursor-pointer  px-6 py-2  text-black flex items-center gap-1 rounded-md bg-white border border-cyan-800 hover:bg-cyan-50"
+                className="cursor-pointer px-6 py-2 text-black flex items-center gap-1 rounded-md bg-white  hover:bg-cyan-100"
               >
                 Log Out
                 <IoIosLogOut className="text-lg mt-1" />
               </button>
             ) : (
-              <Link to="/login" onClick={() => setIsOpen(false)}>
-                <button
-                  className="cursor-pointer bg-cyan-800 hover:bg-cyan-700 px-6 py-2 rounded-md text-white"
-                  onClick={handleLogin}
-                >
-                  Log In
-                </button>
-              </Link>
+              <button
+                onClick={() => {
+                  handleLoginRedirect();
+                  setIsOpen(false);
+                }}
+                className="cursor-pointer bg-cyan-800 hover:bg-cyan-700 px-6 py-2 rounded-md text-white"
+              >
+                Log In
+              </button>
             )}
           </div>
         ) : null}
+
         <div className="items-center gap-5 hidden md:flex">
           {navLinks.map((link) => (
             <Link key={link.to} to={link.to} className={getLinkClass(link.to)}>
@@ -111,24 +127,22 @@ const Navbar = () => {
             </Link>
           ))}
 
-          {/* 🔧 CONDITIONAL RENDERING: Shows logout if logged in, login if not */}
+          {/* Conditional rendering based on real auth state */}
           {isLoggedIn ? (
             <button
               onClick={handleLogout}
-              className="cursor-pointer  px-6 py-2  text-black flex items-center gap-1 rounded-md bg-white border border-cyan-800 hover:bg-cyan-50"
+              className="cursor-pointer px-6 py-2 text-black flex items-center gap-1 rounded-md bg-white  hover:bg-cyan-100"
             >
               Log Out
               <IoIosLogOut className="text-lg mt-1" />
             </button>
           ) : (
-            <Link to="/login">
-              <button
-                className="cursor-pointer bg-cyan-800 hover:bg-cyan-700 px-6 py-2 rounded-md text-white"
-                onClick={handleLogin}
-              >
-                Log In
-              </button>
-            </Link>
+            <button
+              onClick={handleLoginRedirect}
+              className="cursor-pointer bg-cyan-800 hover:bg-cyan-700 px-6 py-2 rounded-md text-white"
+            >
+              Log In
+            </button>
           )}
         </div>
       </div>

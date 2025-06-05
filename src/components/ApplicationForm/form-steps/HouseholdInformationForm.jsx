@@ -240,27 +240,6 @@ export default function HouseholdInformationForm({
           </div>
 
           <div>
-            <Label htmlFor="parent1OtherIncome">Other form of income</Label>
-            <Select
-              value={formData.parent1OtherIncome}
-              onValueChange={(value) =>
-                handleSelectChange("parent1OtherIncome", value)
-              }
-            >
-              <SelectTrigger id="parent1OtherIncome" className="mt-1 w-full">
-                <SelectValue placeholder="No" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="no">No</SelectItem>
-                <SelectItem value="rental">Rental Income</SelectItem>
-                <SelectItem value="investment">Investment Income</SelectItem>
-                <SelectItem value="pension">Pension</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
             <Label htmlFor="parent1MonthlyIncome">Monthly Income</Label>
             <Input
               id="parent1MonthlyIncome"
@@ -356,27 +335,6 @@ export default function HouseholdInformationForm({
               placeholder="e.g., Primary school teacher"
               className="mt-1 w-full"
             />
-          </div>
-
-          <div>
-            <Label htmlFor="parent2OtherIncome">Other form of income</Label>
-            <Select
-              value={formData.parent2OtherIncome}
-              onValueChange={(value) =>
-                handleSelectChange("parent2OtherIncome", value)
-              }
-            >
-              <SelectTrigger id="parent2OtherIncome" className="mt-1 w-full">
-                <SelectValue placeholder="No" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="no">No</SelectItem>
-                <SelectItem value="rental">Rental Income</SelectItem>
-                <SelectItem value="investment">Investment Income</SelectItem>
-                <SelectItem value="pension">Pension</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div>

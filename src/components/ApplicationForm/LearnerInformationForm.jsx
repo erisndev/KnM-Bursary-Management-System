@@ -5,6 +5,8 @@ import EducationInformationForm from "./form-steps/EducationInformationForm";
 import HouseholdInformationForm from "./form-steps/HouseholdInformationForm";
 import RequiredDocumentsForm from "./form-steps/RequiredDocumentsForm";
 import SuccessMessage from "./form-steps/SuccessMessage";
+import baseAPI from "../../../environment";
+import { toast } from "react-hot-toast";
 
 // ============================================================================
 // CONSTANTS & CONFIGURATION
@@ -221,11 +223,6 @@ const VALIDATION_RULES = {
     pattern: /^\d+(\.\d{1,2})?$/,
     message: "Monthly income must be a valid amount (e.g., 5000.00)",
   },
-  parent1OtherIncome: {
-    required: false,
-    pattern: /^\d+(\.\d{1,2})?$/,
-    message: "Other income must be a valid amount (e.g., 1000.00)",
-  },
 };
 
 // ============================================================================
@@ -372,8 +369,7 @@ const validateSpecialFields = (fieldName, value, formData) => {
       break;
     }
 
-    case "parent1MonthlyIncome":
-    case "parent1OtherIncome": {
+    case "parent1MonthlyIncome": {
       const income = Number.parseFloat(value);
       if (income < 0) return "Income cannot be negative";
       if (income > 1000000) return "Please enter a reasonable income amount";
@@ -502,7 +498,6 @@ const createInitialFormData = () => ({
   parent1EmploymentStatus: "",
   parent1Occupation: "",
   parent1MonthlyIncome: "",
-  parent1OtherIncome: "",
 
   // Parent 2 Information (Optional)
   parent2FirstName: "",
@@ -512,7 +507,6 @@ const createInitialFormData = () => ({
   parent2EmploymentStatus: "",
   parent2Occupation: "",
   parent2MonthlyIncome: "",
-  parent2OtherIncome: "",
 });
 
 /**
@@ -775,11 +769,7 @@ export default function LearnerInformationForm() {
     });
 
     // Validate optional parent 1 fields (if provided)
-    const parent1OptionalFields = [
-      "parent1Occupation",
-      "parent1MonthlyIncome",
-      "parent1OtherIncome",
-    ];
+    const parent1OptionalFields = ["parent1Occupation", "parent1MonthlyIncome"];
     parent1OptionalFields.forEach((field) => {
       if (formData[field]) {
         const error = validateField(field, formData[field], formData);
@@ -1060,9 +1050,6 @@ export default function LearnerInformationForm() {
   /**
    * Adds a new household member
    */
-  const handleAddMember = () => {
-    setMemberCount((prev) => prev + 1);
-  };
 
   // ========================================
   // NAVIGATION HANDLERS
@@ -1167,7 +1154,7 @@ export default function LearnerInformationForm() {
   /**
    * Handles form submission with comprehensive validation
    */
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate all steps
     const allErrors = {
       ...validatePersonalInfo(),
@@ -1177,18 +1164,61 @@ export default function LearnerInformationForm() {
     };
 
     if (Object.keys(allErrors).length === 0) {
-      // All validations passed - proceed with submission
-      console.log("Final form data on submit:", formData);
-      console.log("Submitted documents:", documents);
-
       setIsSubmitting(true);
 
-      // Simulate API call
-      setTimeout(() => {
+      // Prepare form data for API (including files)
+      const apiFormData = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        apiFormData.append(key, value);
+      });
+
+      // Attach documents
+      Object.entries(documents).forEach(([key, doc]) => {
+        if (doc && doc.file) {
+          apiFormData.append(key, doc.file);
+        }
+      });
+
+      // Attach additional documents
+      additionalDocs.forEach((file, idx) => {
+        if (file) {
+          apiFormData.append(`additionalDoc${idx}`, file);
+        }
+      });
+
+      // Attach subjects as JSON
+      apiFormData.append("subjects", JSON.stringify(subjects));
+      // Attach previousEducations as JSON
+      apiFormData.append(
+        "previousEducations",
+        JSON.stringify(previousEducations)
+      );
+
+      try {
+        console.log("Submitting form data...");
+        const token = localStorage.getItem("token");
+        const response = await fetch(`${baseAPI}/applications/create`, {
+          method: "POST",
+          body: apiFormData,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+          console.error("Server response:", responseData);
+          throw new Error(responseData.error || "Failed to submit application");
+        }
+
         setIsSubmitting(false);
         setIsSubmitted(true);
-        clearStoredData(); // Clear saved data after successful submission
-      }, 1000);
+        toast.success("Application submitted successfully!");
+        clearStoredData();
+      } catch (error) {
+        console.error("Submission error:", error);
+        setIsSubmitting(false);
+        toast.error("Submission failed: " + error.message);
+      }
     } else {
       // Find first incomplete step and navigate to it
       const firstIncompleteStep = findFirstIncompleteStep();
@@ -1204,7 +1234,6 @@ export default function LearnerInformationForm() {
         );
         setTouched(touchedFields);
 
-        // Show user-friendly error message
         alert(
           `Please complete all required fields in ${FORM_STEPS[firstIncompleteStep].label} before submitting.`
         );
@@ -1413,7 +1442,6 @@ export default function LearnerInformationForm() {
             {...commonFormProps}
             handleSelectChange={handleSelectChange}
             memberCount={memberCount}
-            handleAddMember={handleAddMember}
           />
         )}
         {activeStep === 3 && (

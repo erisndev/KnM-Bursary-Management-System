@@ -1,64 +1,17 @@
 import { useState } from "react";
 import { Home, User, LogOut, Menu } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ApplicationsPage from "@/components/Dashboard/Application";
 import ProfilePage from "@/components/Dashboard/Profile";
+import toast from "react-hot-toast";
 
 export default function Dashboard() {
   const [activePage, setActivePage] = useState("applications");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const subjectGrades = [
-    { name: "Mathematics", grade: "85" },
-    { name: "Physical Science", grade: "78" },
-    { name: "English", grade: "90" },
-    { name: "Life Sciences", grade: "80" },
-    { name: "Geography", grade: "75" },
-    { name: "Afrikaans", grade: "59" },
-  ];
-
-  const gpa = (
-    subjectGrades.reduce((sum, subj) => sum + Number(subj.grade), 0) /
-    subjectGrades.length
-  ).toFixed(0);
-
-  const profileData = {
-    personal: {
-      firstName: "John",
-      lastName: "Doe",
-      age: "19",
-      gender: "Male",
-      idNumber: "1234567890123",
-      nationality: "South African",
-    },
-    contact: {
-      email: "john@mail.com",
-      number: "0817654321",
-      address: "12 Trial Street",
-      city: "Cape Town",
-      province: "Western Cape",
-    },
-    education: {
-      schoolName: "Springfield High School",
-      highestGrade: "12",
-      yearCompleted: "2022",
-      subjects: subjectGrades,
-      gpa: gpa,
-    },
-    higher: {
-      institution: "University of Cape Town",
-      qualification: "BSc Computer Science",
-      faculty: "Science",
-      currentYear: "2nd Year",
-    },
-    documents: {
-      studentId: { name: "student_id.pdf", uploaded: true },
-      matricCertificate: { name: "matric.pdf", uploaded: true },
-      resume: { name: "john_doe_cv.pdf", uploaded: true },
-      academicRecord: { name: "No file", uploaded: false },
-      proofOfIncome: { name: "No file", uploaded: false },
-    },
-  };
+  // For simplicity, let's assume you store user ID in localStorage or get it from token decoded
+  const userId = localStorage.getItem("userId"); // Or get from token decode logic
 
   const applications = [
     {
@@ -68,6 +21,13 @@ export default function Dashboard() {
       date: "2023-09-15",
     },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    toast.success("Logout successful!");
+    navigate("/login");
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -81,6 +41,7 @@ export default function Dashboard() {
           <Menu size={24} />
         </button>
       )}
+
       {/* Sidebar */}
       <div
         className={`fixed z-30 top-0 left-0 h-full w-64 bg-gray-100 border-r transition-transform duration-200
@@ -131,13 +92,13 @@ export default function Dashboard() {
             <span>Profile</span>
           </div>
 
-          <Link
-            to="/login"
-            className="flex items-center px-4 py-2 text-md text-gray-600 hover:bg-cyan-600 hover:text-white"
+          <button
+            onClick={handleLogout}
+            className="flex items-center px-4 py-2 text-md text-gray-600 hover:bg-cyan-600 hover:text-white w-full"
           >
             <LogOut size={16} className="mr-2" />
             <span>Logout</span>
-          </Link>
+          </button>
         </nav>
       </div>
 
@@ -154,7 +115,7 @@ export default function Dashboard() {
         {activePage === "applications" ? (
           <ApplicationsPage applications={applications} />
         ) : (
-          <ProfilePage profileData={profileData} />
+          <ProfilePage userId={userId} />
         )}
       </div>
     </div>

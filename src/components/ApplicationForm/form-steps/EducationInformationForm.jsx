@@ -22,9 +22,10 @@ export default function EducationInformationForm({
   setTouched = () => {}, // Provide a default no-op function
   validateField, // Validation function from parent component
   focusRef,
-  subjects: initialSubjects = [],
+  subjects: parentSubjects = [],
+  setSubjects: setParentSubjects = () => {}, // Add this prop to update parent's subjects
 }) {
-  const [subjects, setSubjects] = useState(initialSubjects);
+  const [subjects, setSubjects] = useState(parentSubjects);
   const [subject, setSubject] = useState("");
   const [grade, setGrade] = useState("");
   const [editIndex, setEditIndex] = useState(-1);
@@ -112,14 +113,17 @@ export default function EducationInformationForm({
 
     if (sError || gError) return;
 
+    let updatedSubjects;
     if (editIndex >= 0) {
-      const updatedSubjects = [...subjects];
+      updatedSubjects = [...subjects];
       updatedSubjects[editIndex] = { name: subject, grade };
-      setSubjects(updatedSubjects);
       setEditIndex(-1);
     } else {
-      setSubjects([...subjects, { name: subject, grade }]);
+      updatedSubjects = [...subjects, { name: subject, grade }];
     }
+
+    setSubjects(updatedSubjects);
+    setParentSubjects(updatedSubjects); // Update parent's subjects state
 
     setSubject("");
     setGrade("");
@@ -143,6 +147,7 @@ export default function EducationInformationForm({
   const handleDeleteSubject = (index) => {
     const updatedSubjects = subjects.filter((_, i) => i !== index);
     setSubjects(updatedSubjects);
+    setParentSubjects(updatedSubjects); // Update parent's subjects state
   };
 
   return (

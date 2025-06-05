@@ -31,9 +31,9 @@ const Home = () => {
           <p className="mt-4 mb-6 text-base sm:text-lg md:text-xl font-semibold drop-shadow">
             Find and apply for bursaries that match your goals and aspirations
           </p>
-          <Link to="/register">
+          <Link to="/apply">
             <button className="cursor-pointer bg-cyan-800 hover:bg-cyan-700 px-6 sm:px-8 py-3 rounded-md text-white font-bold shadow-lg border-2 border-cyan-900">
-              Get Started
+              Apply Now
             </button>
           </Link>
         </div>
