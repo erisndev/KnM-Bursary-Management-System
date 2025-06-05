@@ -21,7 +21,7 @@ const Home = () => {
       {/* ======================== HERO SECTION ======================== */}
       <div
         className="bg-cover bg-center min-h-[100vh] w-full flex items-center justify-center relative"
-        style={{ backgroundImage: "url('./hero.jpg')" }}
+        style={{ backgroundImage: "url('./hero.webp')" }}
       >
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="relative w-full px-6 sm:px-12 md:px-24 max-w-4xl text-white text-center">
@@ -220,6 +220,7 @@ const Home = () => {
                 className="bg-white w-full max-w-[420px] p-6 rounded-xl shadow-md flex flex-col items-center text-center hover:shadow-lg transition-shadow duration-300 mx-auto"
               >
                 <img
+                  loading="lazy"
                   src={item.profile}
                   alt={item.studentName}
                   className="w-20 h-20 rounded-full object-cover mb-4 border-4 border-cyan-100 shadow"
