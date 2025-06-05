@@ -575,7 +575,7 @@ export default function LearnerInformationForm() {
     nationalIdCard: {},
     proofOfResidence: {},
     letterOfRecommendation: {},
-    resume: {},
+    proofOfBankAccount: {},
     coverLetter: {},
     payslip: {},
   });
@@ -821,7 +821,7 @@ export default function LearnerInformationForm() {
     // Optional documents (validate if uploaded)
     const optionalDocs = [
       "letterOfRecommendation",
-      "resume",
+      "proofOfBankAccount",
       "coverLetter",
       "payslip",
     ];
@@ -1262,7 +1262,7 @@ export default function LearnerInformationForm() {
         nationalIdCard: {},
         proofOfResidence: {},
         letterOfRecommendation: {},
-        resume: {},
+        proofOfBankAccount: {},
         coverLetter: {},
         payslip: {},
       });

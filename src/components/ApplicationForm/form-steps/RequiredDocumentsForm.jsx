@@ -96,9 +96,9 @@ export default function RequiredDocumentsForm({
       />
 
       <FileUploadField
-        title="Resume/CV"
-        description="Provide an up-to-date copy of your Resume or CV."
-        docType="resume"
+        title="Proof of Bank Account"
+        description="Provide a copy of your proof of bank account."
+        docType="proofOfBankAccount"
         documents={documents}
         handleFileUpload={handleFileUpload}
         handleFileRemove={handleFileRemove}

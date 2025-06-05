@@ -28,7 +28,7 @@ export default function SupportingDocuments({
     nationalIdCard: "National ID Card",
     proofOfResidence: "Proof of Residence",
     letterOfRecommendation: "Letter of Recommendation",
-    resume: "Resume/CV",
+    proofOfBankAccount: "Proof of Bank Account",
     coverLetter: "Cover Letter",
     payslip: "Recent Payslip",
   };
