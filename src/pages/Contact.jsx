@@ -108,17 +108,15 @@ const Contact = () => {
             We'd love to hear from you! Reach out with any questions or
             feedback.
           </p>
-          <div className="mb-4">
-            <div className="font-semibold">Email:</div>
-            <div>info@knmbursary.org</div>
-          </div>
+
           <div className="mb-4">
             <div className="font-semibold">Phone:</div>
-            <div>+27 12 345 6789</div>
+            <div>011-462-6269</div>
           </div>
           <div>
             <div className="font-semibold">Address:</div>
-            <div>123 Main Street, Pretoria, South Africa</div>
+            <div>150 Bryanston Drive Bryanston, Sandton, 2191</div>
+            <div>Johannesburg</div>
           </div>
         </div>
 

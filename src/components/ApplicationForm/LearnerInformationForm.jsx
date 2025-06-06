@@ -810,7 +810,12 @@ export default function LearnerInformationForm() {
     const newErrors = {};
 
     // Required documents
-    const requiredDocs = ["transcript", "nationalIdCard", "proofOfResidence"];
+    const requiredDocs = [
+      "transcript",
+      "nationalIdCard",
+      "proofOfResidence",
+      "proofOfBankAccount",
+    ];
     requiredDocs.forEach((docType) => {
       const error = validateDocument(docType, documents[docType], true);
       if (error) {

@@ -84,7 +84,7 @@ export default function ProfilePage({ userId, onNavigate }) {
     studentData.status !== "approved" && studentData.status !== "rejected";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mb-10">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-cyan-900">Profile</h1>
         <div className="flex items-center gap-4">

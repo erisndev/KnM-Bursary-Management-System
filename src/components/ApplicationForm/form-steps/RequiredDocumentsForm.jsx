@@ -96,15 +96,24 @@ export default function RequiredDocumentsForm({
       />
 
       <FileUploadField
-        title="Proof of Bank Account"
+        title={
+          <>
+            Proof of Bank Account
+            <span className="text-red-500 ml-1">*</span>
+          </>
+        }
         description="Provide a copy of your proof of bank account."
         docType="proofOfBankAccount"
         documents={documents}
         handleFileUpload={handleFileUpload}
         handleFileRemove={handleFileRemove}
         acceptedFormats=".pdf,.doc,.docx"
-        required={false}
-        optional={true}
+        error={
+          touched.proofOfBankAccount && errors.proofOfBankAccount
+            ? errors.proofOfBankAccount
+            : null
+        }
+        required={true}
       />
 
       <FileUploadField
