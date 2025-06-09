@@ -145,6 +145,28 @@ const applicationSteps = [
 ];
 
 const NoApplicationMessage = ({ onApplyClick }) => {
+  // Custom ZAR (Rand) Icon
+  const ZARIcon = (props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      aria-hidden="true"
+      {...props}
+    >
+      <text
+        x="4"
+        y="18"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontWeight="bold"
+        fontSize="16"
+        fill="currentColor"
+      >
+        R
+      </text>
+    </svg>
+  );
+
   return (
     <div className="min-h-screen bg-gray-100 py-8 sm:py-12 lg:py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -175,7 +197,7 @@ const NoApplicationMessage = ({ onApplyClick }) => {
           <div className="px-6 sm:px-8 py-8 sm:py-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
               <div className="text-center p-4 sm:p-6 bg-gray-50 rounded-lg">
-                <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-green-600 mx-auto mb-3 sm:mb-4" />
+                <ZARIcon className="w-8 h-8 sm:w-10 sm:h-10 text-cyan-600 mx-auto mb-3 sm:mb-4" />
                 <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">
                   Financial Support
                 </h3>
