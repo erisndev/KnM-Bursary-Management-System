@@ -28,6 +28,18 @@ const relationshipOptions = [
   { value: "other", label: "Other" },
 ];
 
+const incomeRanges = [
+  { value: "0-1000", label: "R0 - R1,000" },
+  { value: "1001-3000", label: "R1,001 - R3,000" },
+  { value: "3001-5000", label: "R3,001 - R5,000" },
+  { value: "5001-10000", label: "R5,001 - R10,000" },
+  { value: "10001-20000", label: "R10,001 - R20,000" },
+  { value: "20001-30000", label: "R20,001 - R30,000" },
+  { value: "30001-50000", label: "R30,001 - R50,000" },
+  { value: "50001-100000", label: "R50,001 - R100,000" },
+  { value: "100001+", label: "R100,001+" },
+];
+
 export default function HouseholdInformationForm({
   formData,
   handleInputChange,
@@ -283,13 +295,24 @@ export default function HouseholdInformationForm({
 
           <div>
             <Label htmlFor="parent1MonthlyIncome">Monthly Income</Label>
-            <Input
+            <Select
               id="parent1MonthlyIncome"
               value={formData.parent1MonthlyIncome}
-              onChange={handleInputChange}
-              placeholder="e.g., $4000"
-              className="mt-1 w-full"
-            />
+              onValueChange={(value) =>
+                handleSelectChange("parent1MonthlyIncome", value)
+              }
+            >
+              <SelectTrigger className="mt-1 w-full">
+                <SelectValue placeholder="Select monthly income range" />
+              </SelectTrigger>
+              <SelectContent>
+                {incomeRanges.map((range) => (
+                  <SelectItem key={range.value} value={range.value}>
+                    {range.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -401,13 +424,24 @@ export default function HouseholdInformationForm({
 
           <div>
             <Label htmlFor="parent2MonthlyIncome">Monthly Income</Label>
-            <Input
+            <Select
               id="parent2MonthlyIncome"
               value={formData.parent2MonthlyIncome}
-              onChange={handleInputChange}
-              placeholder="e.g., $3500"
-              className="mt-1 w-full"
-            />
+              onValueChange={(value) =>
+                handleSelectChange("parent2MonthlyIncome", value)
+              }
+            >
+              <SelectTrigger className="mt-1 w-full">
+                <SelectValue placeholder="Select monthly income range" />
+              </SelectTrigger>
+              <SelectContent>
+                {incomeRanges.map((range) => (
+                  <SelectItem key={range.value} value={range.value}>
+                    {range.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
