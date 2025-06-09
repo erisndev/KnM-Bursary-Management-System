@@ -16,6 +16,7 @@ import { toast } from "react-hot-toast";
 const STORAGE_KEYS = {
   FORM_DATA: "bursary_form_data",
   CURRENT_STEP: "bursary_form_step",
+  SUBJECTS: "bursary_form_subjects",
 };
 
 /** Form step configuration */
@@ -545,6 +546,7 @@ const clearStoredData = () => {
   try {
     localStorage.removeItem(STORAGE_KEYS.FORM_DATA);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_STEP);
+    localStorage.removeItem(STORAGE_KEYS.SUBJECTS);
   } catch (error) {
     console.error("Error clearing stored data:", error);
   }
@@ -567,6 +569,11 @@ export default function LearnerInformationForm() {
   /** Main form data object */
   const [formData, setFormData] = useState(() =>
     loadFromStorage(STORAGE_KEYS.FORM_DATA, createInitialFormData())
+  );
+
+  /** Subjects array */
+  const [subjects, setSubjects] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.SUBJECTS, [])
   );
 
   /** Document upload states */
@@ -592,7 +599,6 @@ export default function LearnerInformationForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   /** Education-specific states */
-  const [subjects, setSubjects] = useState([]);
   const [memberCount, setMemberCount] = useState(1);
 
   /** Step completion tracking */
@@ -890,6 +896,10 @@ export default function LearnerInformationForm() {
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.CURRENT_STEP, activeStep);
   }, [activeStep]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.SUBJECTS, subjects);
+  }, [subjects]);
 
   // ========================================
   // EVENT HANDLERS
