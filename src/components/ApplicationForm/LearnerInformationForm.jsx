@@ -221,8 +221,8 @@ const VALIDATION_RULES = {
   },
   parent1MonthlyIncome: {
     required: false,
-    pattern: /^\d+(\.\d{1,2})?$/,
-    message: "Monthly income must be a valid amount (e.g., 5000.00)",
+    pattern: /^(\d{1,6}-\d{1,6}|100001\+)$/,
+    message: "Please select a valid income range",
   },
 };
 
