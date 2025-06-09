@@ -624,7 +624,7 @@ export default function LearnerInformationForm() {
    * Validates all personal information fields
    * @returns {Object} Object containing validation errors
    */
-  const validatePersonalInfo = () => {
+  const validatePersonalInfo = useCallback(() => {
     const newErrors = {};
     const personalFields = [
       "fullName",
@@ -648,13 +648,13 @@ export default function LearnerInformationForm() {
     });
 
     return newErrors;
-  };
+  }, [formData]);
 
   /**
    * Validates all education information fields including subjects
    * @returns {Object} Object containing validation errors
    */
-  const validateEducationInfo = () => {
+  const validateEducationInfo = useCallback(() => {
     const newErrors = {};
 
     // Validate basic education fields
@@ -733,13 +733,13 @@ export default function LearnerInformationForm() {
     }
 
     return newErrors;
-  };
+  }, [formData, subjects]);
 
   /**
    * Validates all household information fields
    * @returns {Object} Object containing validation errors
    */
-  const validateHouseholdInfo = () => {
+  const validateHouseholdInfo = useCallback(() => {
     const newErrors = {};
 
     // Validate household size
@@ -800,13 +800,13 @@ export default function LearnerInformationForm() {
     }
 
     return newErrors;
-  };
+  }, [formData]);
 
   /**
    * Validates all required and optional documents
    * @returns {Object} Object containing validation errors
    */
-  const validateRequiredDocuments = () => {
+  const validateRequiredDocuments = useCallback(() => {
     const newErrors = {};
 
     // Required documents
@@ -855,7 +855,27 @@ export default function LearnerInformationForm() {
     });
 
     return newErrors;
-  };
+  }, [documents, additionalDocs]);
+
+  /** Update step completion status when form data changes */
+  useEffect(() => {
+    const newCompletionStatus = [
+      Object.keys(validatePersonalInfo()).length === 0,
+      Object.keys(validateEducationInfo()).length === 0,
+      Object.keys(validateHouseholdInfo()).length === 0,
+      Object.keys(validateRequiredDocuments()).length === 0,
+    ];
+    setStepCompletionStatus(newCompletionStatus);
+  }, [
+    formData,
+    subjects,
+    documents,
+    additionalDocs,
+    validatePersonalInfo,
+    validateEducationInfo,
+    validateHouseholdInfo,
+    validateRequiredDocuments,
+  ]);
 
   // ========================================
   // SIDE EFFECTS & PERSISTENCE
@@ -870,53 +890,6 @@ export default function LearnerInformationForm() {
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.CURRENT_STEP, activeStep);
   }, [activeStep]);
-
-  // Memoize validation functions to avoid re-creating them on each render
-  // Memoized validation functions for each step.
-  // These use useCallback to avoid unnecessary re-creation on each render,
-  // and ensure that dependencies are tracked correctly for useEffect and other hooks.
-
-  // Memoized personal info validation (depends on formData)
-  const validatePersonalInfoCallback = useCallback(validatePersonalInfo, [
-    formData,
-  ]);
-
-  // Memoized education info validation (depends on formData and subjects)
-  const validateEducationInfoCallback = useCallback(validateEducationInfo, [
-    formData,
-    subjects,
-  ]);
-
-  // Memoized household info validation (depends on formData)
-  const validateHouseholdInfoCallback = useCallback(validateHouseholdInfo, [
-    formData,
-  ]);
-
-  // Memoized required documents validation (depends on documents and additionalDocs)
-  const validateRequiredDocumentsCallback = useCallback(
-    validateRequiredDocuments,
-    [documents, additionalDocs]
-  );
-
-  /** Update step completion status when form data changes */
-  useEffect(() => {
-    const newCompletionStatus = [
-      Object.keys(validatePersonalInfoCallback()).length === 0,
-      Object.keys(validateEducationInfoCallback()).length === 0,
-      Object.keys(validateHouseholdInfoCallback()).length === 0,
-      Object.keys(validateRequiredDocumentsCallback()).length === 0,
-    ];
-    setStepCompletionStatus(newCompletionStatus);
-  }, [
-    formData,
-    subjects,
-    documents,
-    additionalDocs,
-    validatePersonalInfoCallback,
-    validateEducationInfoCallback,
-    validateHouseholdInfoCallback,
-    validateRequiredDocumentsCallback,
-  ]);
 
   // ========================================
   // EVENT HANDLERS
@@ -1052,10 +1025,6 @@ export default function LearnerInformationForm() {
     });
   };
 
-  /**
-   * Adds a new household member
-   */
-
   // ========================================
   // NAVIGATION HANDLERS
   // ========================================
@@ -1139,7 +1108,6 @@ export default function LearnerInformationForm() {
       if (activeStep < 3) setActiveStep(activeStep + 1);
     } else {
       // Show validation errors
-      console.log("Validation errors for step:", stepErrors);
       setErrors(stepErrors);
 
       // Mark all error fields as touched
@@ -1200,7 +1168,6 @@ export default function LearnerInformationForm() {
       );
 
       try {
-        console.log("Submitting form data...");
         const token = localStorage.getItem("token");
         const response = await fetch(`${baseAPI}/applications/create`, {
           method: "POST",
@@ -1211,7 +1178,6 @@ export default function LearnerInformationForm() {
         const responseData = await response.json();
 
         if (!response.ok) {
-          console.error("Server response:", responseData);
           throw new Error(responseData.error || "Failed to submit application");
         }
 
@@ -1220,7 +1186,6 @@ export default function LearnerInformationForm() {
         toast.success("Application submitted successfully!");
         clearStoredData();
       } catch (error) {
-        console.error("Submission error:", error);
         setIsSubmitting(false);
         toast.error("Submission failed: " + error.message);
       }

@@ -1,7 +1,6 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectTrigger,
@@ -9,8 +8,25 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import FormField from "@/components/ui/form-field";
 import { cn } from "@/lib/utils";
+
+const genderOptions = [
+  { value: "female", label: "Female" },
+  { value: "male", label: "Male" },
+  { value: "prefer not to say", label: "Prefer not to say" },
+  { value: "other", label: "Other" },
+];
+
+const relationshipOptions = [
+  { value: "mother", label: "Mother" },
+  { value: "father", label: "Father" },
+  { value: "guardian", label: "Guardian" },
+  { value: "sibling", label: "Sibling" },
+  { value: "grandparent", label: "Grandparent" },
+  { value: "aunt", label: "Aunt" },
+  { value: "uncle", label: "Uncle" },
+  { value: "other", label: "Other" },
+];
 
 export default function HouseholdInformationForm({
   formData,
@@ -24,7 +40,7 @@ export default function HouseholdInformationForm({
   return (
     <div className="w-full max-w-6xl mx-auto ">
       <h2 className="text-xl font-semibold mb-2 text-center">
-        Financial Information
+        Household Information
       </h2>
       <p className="text-gray-500 text-sm mb-12 text-center">
         Please provide details about your household.
@@ -135,24 +151,37 @@ export default function HouseholdInformationForm({
             <Label htmlFor="parent1Gender">
               Gender <span className="text-red-500 ml-1">*</span>
             </Label>
-            <Input
-              id="parent1Gender"
+            <Select
               value={formData.parent1Gender}
-              onChange={handleInputChange}
-              placeholder="e.g., Female"
-              onBlur={() => handleBlur("parent1Gender")}
-              className={cn(
-                "w-full mt-1",
-                touched.parent1Gender && errors.parent1Gender
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
-              )}
-              ref={
-                Object.keys(errors).length > 0 && errors.parent1Gender
-                  ? focusRef
-                  : null
-              }
-            />
+              onValueChange={(value) => {
+                handleSelectChange("parent1Gender", value);
+                handleBlur("parent1Gender");
+              }}
+            >
+              <SelectTrigger
+                id="parent1Gender"
+                className={cn(
+                  "w-full mt-1",
+                  touched.parent1Gender && errors.parent1Gender
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                )}
+                ref={
+                  Object.keys(errors).length > 0 && errors.parent1Gender
+                    ? focusRef
+                    : null
+                }
+              >
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                {genderOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {touched.parent1Gender && errors.parent1Gender && (
               <p className="text-red-500 text-xs mt-1">
                 {errors.parent1Gender}
@@ -164,24 +193,37 @@ export default function HouseholdInformationForm({
             <Label htmlFor="parent1Relationship" className="flex">
               Relationship <span className="text-red-500 ml-1">*</span>
             </Label>
-            <Input
-              id="parent1Relationship"
+            <Select
               value={formData.parent1Relationship}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur("parent1Relationship")}
-              placeholder="e.g., Mother"
-              className={cn(
-                "w-full mt-1",
-                touched.parent1Relationship && errors.parent1Relationship
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
-              )}
-              ref={
-                Object.keys(errors).length > 0 && errors.parent1Relationship
-                  ? focusRef
-                  : null
-              }
-            />
+              onValueChange={(value) => {
+                handleSelectChange("parent1Relationship", value);
+                handleBlur("parent1Relationship");
+              }}
+            >
+              <SelectTrigger
+                id="parent1Relationship"
+                className={cn(
+                  "w-full mt-1",
+                  touched.parent1Relationship && errors.parent1Relationship
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                )}
+                ref={
+                  Object.keys(errors).length > 0 && errors.parent1Relationship
+                    ? focusRef
+                    : null
+                }
+              >
+                <SelectValue placeholder="Select relationship" />
+              </SelectTrigger>
+              <SelectContent>
+                {relationshipOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {touched.parent1Relationship && errors.parent1Relationship && (
               <p className="text-red-500 text-xs mt-1">
                 {errors.parent1Relationship}
@@ -282,24 +324,44 @@ export default function HouseholdInformationForm({
 
           <div>
             <Label htmlFor="parent2Gender">Gender</Label>
-            <Input
-              id="parent2Gender"
+            <Select
               value={formData.parent2Gender}
-              onChange={handleInputChange}
-              placeholder="e.g., Male"
-              className="mt-1 w-full"
-            />
+              onValueChange={(value) =>
+                handleSelectChange("parent2Gender", value)
+              }
+            >
+              <SelectTrigger id="parent2Gender" className="mt-1 w-full">
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                {genderOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
             <Label htmlFor="parent2Relationship">Relationship</Label>
-            <Input
-              id="parent2Relationship"
+            <Select
               value={formData.parent2Relationship}
-              onChange={handleInputChange}
-              placeholder="e.g., Father"
-              className="mt-1 w-full"
-            />
+              onValueChange={(value) =>
+                handleSelectChange("parent2Relationship", value)
+              }
+            >
+              <SelectTrigger id="parent2Relationship" className="mt-1 w-full">
+                <SelectValue placeholder="Select relationship" />
+              </SelectTrigger>
+              <SelectContent>
+                {relationshipOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
