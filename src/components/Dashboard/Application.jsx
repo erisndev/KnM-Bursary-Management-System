@@ -159,7 +159,7 @@ const NoApplicationMessage = ({ onApplyClick }) => {
         y="18"
         fontFamily="Arial, Helvetica, sans-serif"
         fontWeight="bold"
-        fontSize="20"
+        fontSize="22"
         fill="currentColor"
       >
         R
