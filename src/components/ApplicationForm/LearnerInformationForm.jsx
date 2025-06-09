@@ -180,7 +180,7 @@ const VALIDATION_RULES = {
   // Household Information Fields
   numberOfMembers: {
     required: true,
-    pattern: /^[1-9]\d*$/,
+    pattern: /^([1-9]|10\+)$/,
     message: "Number of members must be a positive number",
   },
   parent1FirstName: {
@@ -1110,6 +1110,7 @@ export default function LearnerInformationForm() {
    */
   const handleNext = () => {
     const stepErrors = validateCurrentStep();
+    console.log("Step errors:", stepErrors);
 
     if (Object.keys(stepErrors).length === 0) {
       // Clear errors and move to next step
