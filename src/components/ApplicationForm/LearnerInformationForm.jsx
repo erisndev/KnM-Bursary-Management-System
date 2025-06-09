@@ -64,6 +64,11 @@ const VALIDATION_RULES = {
     maxLength: 10,
     message: "Please enter a valid phone number",
   },
+  idnumber: {
+    required: true,
+    pattern: /^\d{13}$/,
+    message: "ID number must be exactly 13 digits",
+  },
   dob: {
     required: true,
     message: "Date of birth is required",
@@ -331,8 +336,15 @@ const validateSpecialFields = (fieldName, value, formData) => {
 
     case "phone": {
       const digitsOnly = stringValue.replace(/\D/g, "");
-      if (digitsOnly.length < 10 || digitsOnly.length > 15) {
-        return "Phone number must be between 10 and 15 digits";
+      if (digitsOnly.length !== 10) {
+        return "Phone number must be 10 digits long";
+      }
+      break;
+    }
+    case "idnumber": {
+      const digitsOnly = stringValue.replace(/\D/g, "");
+      if (digitsOnly.length !== 13) {
+        return "ID number must be exactly 13 digits";
       }
       break;
     }
@@ -359,7 +371,7 @@ const validateSpecialFields = (fieldName, value, formData) => {
 
     case "institutionGPA": {
       const gpa = Number.parseFloat(value);
-      if (gpa < 0 || gpa > 4) return "GPA must be between 0.00 and 4.00";
+      if (gpa < 0 || gpa > 100) return "GPA must be between 0 and 100 (%)";
       break;
     }
 
@@ -464,6 +476,7 @@ const createInitialFormData = () => ({
   fullName: "",
   email: "",
   phone: "",
+  idnumber: "",
   dob: "",
   gender: "",
   nationality: "",
@@ -636,6 +649,7 @@ export default function LearnerInformationForm() {
       "fullName",
       "email",
       "phone",
+      "idnumber",
       "dob",
       "gender",
       "nationality",
@@ -830,12 +844,7 @@ export default function LearnerInformationForm() {
     });
 
     // Optional documents (validate if uploaded)
-    const optionalDocs = [
-      "letterOfRecommendation",
-      "proofOfBankAccount",
-      "coverLetter",
-      "payslip",
-    ];
+    const optionalDocs = ["letterOfRecommendation", "coverLetter", "payslip"];
     optionalDocs.forEach((docType) => {
       const doc = documents[docType];
       if (doc && doc.uploaded) {

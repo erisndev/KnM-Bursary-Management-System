@@ -25,7 +25,7 @@ export default function PersonalInfo({ data }) {
         </div>
         <div>
           <p className="text-sm font-medium text-gray-500">ID Number:</p>
-          <p className="text-gray-900">123456789</p>
+          <p className="text-gray-900">{data.idnumber}</p>
         </div>
         <div>
           <p className="text-sm font-medium text-gray-500">Nationality:</p>

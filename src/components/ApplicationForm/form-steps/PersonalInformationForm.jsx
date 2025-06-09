@@ -44,6 +44,7 @@ export default function PersonalInformationForm({
     fullName: "",
     email: "",
     phone: "",
+    idnumber: "",
     dob: "",
     gender: "",
     nationality: "",
@@ -234,6 +235,27 @@ export default function PersonalInformationForm({
             <p className="text-red-500 text-xs mt-1 flex items-center">
               <AlertCircle className="w-3 h-3 mr-1" />
               {combinedErrors.phone}
+            </p>
+          )}
+        </div>
+        {/* ID Number */}
+        <div>
+          <Label htmlFor="idnumber" className="flex text-md">
+            ID Number <span className="text-red-500 ml-1">*</span>
+          </Label>
+          <Input
+            id="idnumber"
+            value={localFormData.idnumber}
+            onChange={handleLocalInputChange}
+            onBlur={() => handleLocalBlur("idnumber")}
+            placeholder="e.g., 1234567890123"
+            className={getFieldClassName("idnumber")}
+            maxLength={13}
+          />
+          {combinedTouched.idnumber && combinedErrors.idnumber && (
+            <p className="text-red-500 text-xs mt-1 flex items-center">
+              <AlertCircle className="w-3 h-3 mr-1" />
+              {combinedErrors.idnumber}
             </p>
           )}
         </div>

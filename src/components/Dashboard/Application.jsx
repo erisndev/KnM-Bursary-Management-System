@@ -251,7 +251,7 @@ const NoApplicationMessage = ({ onApplyClick }) => {
             <div className="text-center">
               <button
                 onClick={onApplyClick}
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-sm sm:text-base"
+                className="inline-flex cursor-pointer items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-sm sm:text-base"
               >
                 <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
                 Start Your Application
