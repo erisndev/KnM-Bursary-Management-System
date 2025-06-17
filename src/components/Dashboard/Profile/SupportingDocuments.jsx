@@ -9,7 +9,7 @@ import {
   Check,
   AlertCircle,
 } from "lucide-react";
-import baseAPI, { baseURL } from "../../../../environment";
+import baseAPI from "../../../../environment";
 
 export default function SupportingDocuments({
   documents,
@@ -151,7 +151,7 @@ export default function SupportingDocuments({
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto">
+    <Card className="w-full  mx-auto">
       <CardHeader className="bg-gray-50">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <CardTitle className="text-lg">Supporting Documents</CardTitle>
@@ -300,7 +300,7 @@ export default function SupportingDocuments({
                           asChild
                         >
                           <a
-                            href={`${baseURL}/${normalizedPath}`}
+                            href={`${normalizedPath}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             download

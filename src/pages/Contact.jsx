@@ -32,7 +32,7 @@ const Contact = () => {
 
   const sendEmail = async (templateParams) => {
     try {
-      // Initialize EmailJS (you can also do this once in your app's entry point)
+      // Initialize EmailJS
       if (typeof window !== "undefined" && window.emailjs) {
         window.emailjs.init(EMAILJS_PUBLIC_KEY);
 
@@ -70,7 +70,7 @@ const Contact = () => {
         name: form.name,
         email: form.email,
         message: form.message,
-        to_name: "KNM Bursary Team", // You can customize this
+        to_name: "KNM Bursary Team",
       };
 
       await sendEmail(templateParams);
