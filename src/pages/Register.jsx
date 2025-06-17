@@ -14,6 +14,11 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const isStrongPassword = (password) => {
+    return (
+      password.length >= 8 && /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)
+    );
+  };
 
   const validate = () => {
     const newErrors = {};
@@ -25,8 +30,9 @@ const Register = () => {
       newErrors.email = "Invalid email address";
     }
     if (!form.password) newErrors.password = "Password is required";
-    if (form.password.length < 6)
-      newErrors.password = "Password must be at least 6 characters";
+    if (!isStrongPassword(form.password))
+      newErrors.password =
+        "Password must be at least 8 characters and include uppercase, lowercase, and a number";
     if (!form.confirmPassword)
       newErrors.confirmPassword = "Please confirm your password";
     if (
