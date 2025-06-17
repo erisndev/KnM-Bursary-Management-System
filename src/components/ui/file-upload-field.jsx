@@ -21,10 +21,10 @@ export default function FileUploadField({
         <div className="space-y-2">
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
             <div className="flex items-center">
-              <div className="h-8 w-8 bg-blue-100 rounded-md flex items-center justify-center mr-3">
+              <div className="h-8 w-8 bg-cyan-100 rounded-md flex items-center justify-center mr-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-blue-600"
+                  className="h-5 w-5 text-cyan-600"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >

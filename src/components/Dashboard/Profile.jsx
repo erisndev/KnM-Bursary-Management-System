@@ -49,7 +49,7 @@ export default function ProfilePage({ userId, onNavigate }) {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
       </div>
     );
   }
@@ -108,8 +108,8 @@ export default function ProfilePage({ userId, onNavigate }) {
 
       {/* Show notice if documents cannot be updated */}
       {!canUpdateDocuments && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-blue-700 text-sm">
+        <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+          <p className="text-cyan-700 text-sm">
             <strong>Note:</strong> Your application has been{" "}
             {studentData.status}. Document updates are no longer available for
             this application.

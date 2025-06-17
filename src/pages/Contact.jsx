@@ -104,7 +104,7 @@ const Contact = () => {
         {/* Left Section: Contact Info */}
         <div className="md:w-1/2 w-full bg-cyan-800 text-white rounded-l-lg p-8 flex flex-col justify-center">
           <h2 className="text-3xl font-bold mb-2">Get in Touch</h2>
-          <p className="mb-6 text-blue-100 text-lg">
+          <p className="mb-6 text-cyan-100 text-lg">
             We'd love to hear from you! Reach out with any questions or
             feedback.
           </p>
