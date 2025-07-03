@@ -38,35 +38,44 @@ const Login = () => {
     }
     setLoading(true);
     setApiError("");
+
+    // Use AbortController to timeout the request if it takes too long
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 seconds timeout
+
     try {
       const res = await fetch(`${baseAPI}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(form),
+        signal: controller.signal,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        const errorMessage = data.message || "Login failed";
-        setApiError(errorMessage);
-        toast.error("Login failed. Please check your credentials.");
-      } else {
-        // Save token or user info as needed
+      clearTimeout(timeoutId);
+
+      // Optimistically update UI before waiting for slow network
+      if (res.ok) {
+        const data = await res.json();
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.user.id);
         localStorage.setItem("applicationId", data.user.applicationId);
-
         toast.success("Login successful!");
-        console.log("Token:", data.token);
-        console.log("User ID:", data.user.id);
-        console.log("Application ID:", data.user.applicationId);
         navigate("/dashboard");
+      } else {
+        const data = await res.json();
+        const errorMessage = data.message || "Login failed";
+        setApiError(errorMessage);
+        toast.error("Login failed. Please check your credentials.");
       }
     } catch (error) {
-      const errorMessage = "Network error. Please try again.";
-      setApiError(errorMessage);
-      toast.error(errorMessage);
-      console.error("Login error:", error);
+      if (error.name === "AbortError") {
+        setApiError("Login timed out. Please try again.");
+        toast.error("Login timed out. Please try again.");
+      } else {
+        setApiError("Network error. Please try again.");
+        toast.error("Network error. Please try again.");
+        console.error("Login error:", error);
+      }
     } finally {
       setLoading(false);
     }
