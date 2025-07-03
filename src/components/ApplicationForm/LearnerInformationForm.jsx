@@ -8,11 +8,6 @@ import SuccessMessage from "./form-steps/SuccessMessage";
 import baseAPI from "../../../environment";
 import { toast } from "react-hot-toast";
 
-// ============================================================================
-// CONSTANTS & CONFIGURATION
-// ============================================================================
-
-/** Local storage keys for form persistence */
 const STORAGE_KEYS = {
   FORM_DATA: "bursary_form_data",
   CURRENT_STEP: "bursary_form_step",
@@ -33,14 +28,6 @@ const FILE_CONSTRAINTS = {
   ALLOWED_TYPES: ["application/pdf", "image/jpeg", "image/png", "image/jpg"],
 };
 
-// ============================================================================
-// VALIDATION RULES & SCHEMAS
-// ============================================================================
-
-/**
- * Comprehensive validation rules for all form fields
- * Each rule defines requirements, patterns, and error messages
- */
 const VALIDATION_RULES = {
   // Personal Information Fields
   fullName: {
@@ -231,17 +218,6 @@ const VALIDATION_RULES = {
   },
 };
 
-// ============================================================================
-// VALIDATION FUNCTIONS
-// ============================================================================
-
-/**
- * Validates a single form field based on its validation rules
- * @param {string} fieldName - The name of the field to validate
- * @param {any} value - The current value of the field
- * @param {Object} formData - The complete form data (for conditional validation)
- * @returns {string|null} Error message string or null if valid
- */
 const validateField = (fieldName, value, formData = {}) => {
   const rules = VALIDATION_RULES[fieldName];
   if (!rules) return null;
@@ -293,13 +269,6 @@ const validateField = (fieldName, value, formData = {}) => {
   return validateSpecialFields(fieldName, value, formData);
 };
 
-/**
- * Handles special validation cases that require custom logic
- * @param {string} fieldName - The field being validated
- * @param {any} value - The field value
- * @param {Object} formData - Complete form data for cross-field validation
- * @returns {string|null} Error message or null
- */
 const validateSpecialFields = (fieldName, value, formData) => {
   const stringValue = value.toString().trim();
 
@@ -393,12 +362,6 @@ const validateSpecialFields = (fieldName, value, formData) => {
   return null;
 };
 
-/**
- * Validates subject entries for education section
- * @param {Object} subject - Subject object with name and grade
- * @param {number} index - Index of the subject in the array
- * @returns {Object} Object with validation errors
- */
 const validateSubject = (subject, index) => {
   const errors = {};
 
@@ -434,13 +397,6 @@ const validateSubject = (subject, index) => {
   return errors;
 };
 
-/**
- * Validates uploaded documents
- * @param {string} docType - Type of document being validated
- * @param {Object} document - Document object with file information
- * @param {boolean} isRequired - Whether this document is required
- * @returns {string|null} Error message or null
- */
 const validateDocument = (docType, document, isRequired = true) => {
   if (isRequired && (!document || !document.uploaded)) {
     return `${docType
@@ -463,14 +419,6 @@ const validateDocument = (docType, document, isRequired = true) => {
   return null;
 };
 
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-/**
- * Creates the initial form data structure with empty values
- * @returns {Object} Default form data object
- */
 const createInitialFormData = () => ({
   // Personal Information
   fullName: "",
@@ -523,12 +471,6 @@ const createInitialFormData = () => ({
   parent2MonthlyIncome: "",
 });
 
-/**
- * Safely loads data from localStorage with error handling
- * @param {string} key - Storage key to load from
- * @param {any} defaultValue - Default value if loading fails
- * @returns {any} Parsed data or default value
- */
 const loadFromStorage = (key, defaultValue) => {
   try {
     const saved = localStorage.getItem(key);
@@ -539,11 +481,6 @@ const loadFromStorage = (key, defaultValue) => {
   }
 };
 
-/**
- * Safely saves data to localStorage with error handling
- * @param {string} key - Storage key to save to
- * @param {any} data - Data to save
- */
 const saveToStorage = (key, data) => {
   try {
     localStorage.setItem(key, JSON.stringify(data));
@@ -552,9 +489,6 @@ const saveToStorage = (key, data) => {
   }
 };
 
-/**
- * Clears all form data from localStorage
- */
 const clearStoredData = () => {
   try {
     localStorage.removeItem(STORAGE_KEYS.FORM_DATA);
@@ -565,15 +499,7 @@ const clearStoredData = () => {
   }
 };
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
 export default function LearnerInformationForm() {
-  // ========================================
-  // STATE MANAGEMENT
-  // ========================================
-
   /** Current active step (0-3) */
   const [activeStep, setActiveStep] = useState(() =>
     loadFromStorage(STORAGE_KEYS.CURRENT_STEP, 0)
@@ -635,14 +561,6 @@ export default function LearnerInformationForm() {
     },
   ]);
 
-  // ========================================
-  // VALIDATION FUNCTIONS BY STEP
-  // ========================================
-
-  /**
-   * Validates all personal information fields
-   * @returns {Object} Object containing validation errors
-   */
   const validatePersonalInfo = useCallback(() => {
     const newErrors = {};
     const personalFields = [
@@ -670,10 +588,6 @@ export default function LearnerInformationForm() {
     return newErrors;
   }, [formData]);
 
-  /**
-   * Validates all education information fields including subjects
-   * @returns {Object} Object containing validation errors
-   */
   const validateEducationInfo = useCallback(() => {
     const newErrors = {};
 
@@ -755,10 +669,6 @@ export default function LearnerInformationForm() {
     return newErrors;
   }, [formData, subjects]);
 
-  /**
-   * Validates all household information fields
-   * @returns {Object} Object containing validation errors
-   */
   const validateHouseholdInfo = useCallback(() => {
     const newErrors = {};
 
@@ -822,10 +732,6 @@ export default function LearnerInformationForm() {
     return newErrors;
   }, [formData]);
 
-  /**
-   * Validates all required and optional documents
-   * @returns {Object} Object containing validation errors
-   */
   const validateRequiredDocuments = useCallback(() => {
     const newErrors = {};
 
@@ -892,10 +798,6 @@ export default function LearnerInformationForm() {
     validateRequiredDocuments,
   ]);
 
-  // ========================================
-  // SIDE EFFECTS & PERSISTENCE
-  // ========================================
-
   /** Save form data to localStorage whenever it changes */
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.FORM_DATA, formData);
@@ -910,14 +812,6 @@ export default function LearnerInformationForm() {
     saveToStorage(STORAGE_KEYS.SUBJECTS, subjects);
   }, [subjects]);
 
-  // ========================================
-  // EVENT HANDLERS
-  // ========================================
-
-  /**
-   * Handles input field changes with real-time validation
-   * @param {Event} e - Input change event
-   */
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -932,11 +826,6 @@ export default function LearnerInformationForm() {
     }
   };
 
-  /**
-   * Handles select field changes with real-time validation
-   * @param {string} field - Field name
-   * @param {string} value - Selected value
-   */
   const handleSelectChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
@@ -953,10 +842,6 @@ export default function LearnerInformationForm() {
     }
   };
 
-  /**
-   * Handles field blur events to trigger validation
-   * @param {string} field - Field name that lost focus
-   */
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
 
@@ -968,11 +853,6 @@ export default function LearnerInformationForm() {
     }));
   };
 
-  /**
-   * Handles file uploads with validation
-   * @param {string} docType - Document type being uploaded
-   * @param {Event} event - File input change event
-   */
   const handleFileUpload = (docType, event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -998,10 +878,6 @@ export default function LearnerInformationForm() {
     });
   };
 
-  /**
-   * Handles file removal
-   * @param {string} docType - Document type to remove
-   */
   const handleFileRemove = (docType) => {
     setDocuments((prev) => ({
       ...prev,
@@ -1009,11 +885,6 @@ export default function LearnerInformationForm() {
     }));
   };
 
-  /**
-   * Handles additional document uploads
-   * @param {number} index - Index in additional docs array
-   * @param {Event} event - File input change event
-   */
   const handleAdditionalDocUpload = (index, event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -1044,14 +915,6 @@ export default function LearnerInformationForm() {
     });
   };
 
-  // ========================================
-  // NAVIGATION HANDLERS
-  // ========================================
-
-  /**
-   * Validates the current step
-   * @returns {Object} Validation errors for current step
-   */
   const validateCurrentStep = () => {
     switch (activeStep) {
       case 0:
@@ -1067,10 +930,6 @@ export default function LearnerInformationForm() {
     }
   };
 
-  /**
-   * Finds the first step with validation errors
-   * @returns {number} Step index or -1 if all complete
-   */
   const findFirstIncompleteStep = () => {
     const allValidations = [
       validatePersonalInfo(),
@@ -1087,10 +946,6 @@ export default function LearnerInformationForm() {
     return -1; // All steps complete
   };
 
-  /**
-   * Handles step navigation with validation checks
-   * @param {number} targetStep - Step to navigate to
-   */
   const handleStepClick = (targetStep) => {
     // Allow navigation to previous steps or current step
     if (targetStep <= activeStep) {
@@ -1114,9 +969,6 @@ export default function LearnerInformationForm() {
     setActiveStep(targetStep);
   };
 
-  /**
-   * Handles next button click with validation
-   */
   const handleNext = () => {
     const stepErrors = validateCurrentStep();
     console.log("Step errors:", stepErrors);
@@ -1231,9 +1083,6 @@ export default function LearnerInformationForm() {
     }
   };
 
-  /**
-   * Handles form reset with confirmation
-   */
   const handleClearForm = () => {
     if (
       window.confirm(
@@ -1260,10 +1109,6 @@ export default function LearnerInformationForm() {
     }
   };
 
-  // ========================================
-  // FORM PROPS PREPARATION
-  // ========================================
-
   /** Common props passed to all form step components */
   const commonFormProps = {
     formData,
@@ -1285,10 +1130,6 @@ export default function LearnerInformationForm() {
     validateSubject,
     setTouched, // Add setTouched for education form
   };
-
-  // ========================================
-  // RENDER
-  // ========================================
 
   // Show success message if form has been submitted
   if (isSubmitted) return <SuccessMessage />;

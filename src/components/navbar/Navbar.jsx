@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -18,16 +19,13 @@ const Navbar = () => {
     { to: "/contact", label: "Contact Us" },
   ];
 
-  // Check authentication status on component mount and when location changes
   useEffect(() => {
     const checkAuthStatus = () => {
       const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token); // Convert to boolean
+      setIsLoggedIn(!!token);
     };
 
     checkAuthStatus();
-
-    // Listen for storage changes (in case user logs in/out in another tab)
     window.addEventListener("storage", checkAuthStatus);
 
     return () => {
@@ -40,13 +38,10 @@ const Navbar = () => {
       ? "text-cyan-800 font-semibold"
       : "text-gray-700 hover:text-cyan-800";
 
-  // Real logout handler
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     localStorage.removeItem("user");
-
-    console.log("User logged out");
     toast.success("Logout successful!");
     navigate("/login");
   };
@@ -54,6 +49,31 @@ const Navbar = () => {
   const handleLoginRedirect = () => {
     navigate("/login");
   };
+
+  // Confirmation popup component
+  const ConfirmLogout = ({ onConfirm, onCancel }) => (
+    <div className="fixed inset-0 bg-transparent bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-80 flex flex-col items-center border border-cyan-800">
+        <p className="mb-4 text-center text-cyan-800 font-semibold">
+          Are you sure you want to log out?
+        </p>
+        <div className="flex gap-4">
+          <button
+            onClick={onConfirm}
+            className="bg-cyan-800 text-white px-4 py-2 rounded hover:bg-cyan-700 transition-colors"
+          >
+            Yes, Log Out
+          </button>
+          <button
+            onClick={onCancel}
+            className="bg-white border border-cyan-800 text-cyan-800 px-4 py-2 rounded hover:bg-cyan-50 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <nav className="bg-white shadow-md">
@@ -94,13 +114,9 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* Conditional rendering based on real auth state */}
             {isLoggedIn ? (
               <button
-                onClick={() => {
-                  handleLogout();
-                  setIsOpen(false);
-                }}
+                onClick={() => setShowConfirm(true)}
                 className="cursor-pointer px-6 py-2 text-black flex items-center gap-1 rounded-md bg-white  hover:bg-cyan-100"
               >
                 Log Out
@@ -127,10 +143,9 @@ const Navbar = () => {
             </Link>
           ))}
 
-          {/* Conditional rendering based on real auth state */}
           {isLoggedIn ? (
             <button
-              onClick={handleLogout}
+              onClick={() => setShowConfirm(true)}
               className="cursor-pointer px-6 py-2 text-black flex items-center gap-1 rounded-md bg-white  hover:bg-cyan-100"
             >
               Log Out
@@ -146,6 +161,16 @@ const Navbar = () => {
           )}
         </div>
       </div>
+      {showConfirm && (
+        <ConfirmLogout
+          onConfirm={() => {
+            setShowConfirm(false);
+            setIsOpen(false);
+            handleLogout();
+          }}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
     </nav>
   );
 };

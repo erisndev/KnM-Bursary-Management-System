@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [activePage, setActivePage] = useState("applications");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // For simplicity, let's assume you store user ID in localStorage or get it from token decoded
   const userId = localStorage.getItem("userId"); // Or get from token decode logic
@@ -29,6 +30,31 @@ export default function Dashboard() {
     navigate("/login");
   };
 
+  // Confirmation popup component
+  const ConfirmLogout = ({ onConfirm, onCancel }) => (
+    <div className="fixed inset-0 bg-transparent bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-80 flex flex-col items-center border border-cyan-800">
+        <p className="mb-4 text-center text-cyan-800 font-semibold">
+          Are you sure you want to log out?
+        </p>
+        <div className="flex gap-4">
+          <button
+            onClick={onConfirm}
+            className="bg-cyan-800 text-white px-4 py-2 rounded hover:bg-cyan-700 transition-colors"
+          >
+            Yes, Log Out
+          </button>
+          <button
+            onClick={onCancel}
+            className="bg-white border border-cyan-800 text-cyan-800 px-4 py-2 rounded hover:bg-cyan-50 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Mobile menu button */}
@@ -41,7 +67,6 @@ export default function Dashboard() {
           <Menu size={24} />
         </button>
       )}
-
       {/* Sidebar */}
       <div
         className={`fixed z-30 top-0 left-0 h-full w-64 bg-gray-100 border-r transition-transform duration-200
@@ -93,7 +118,7 @@ export default function Dashboard() {
           </div>
 
           <button
-            onClick={handleLogout}
+            onClick={() => setShowConfirm(true)}
             className="flex items-center px-4 py-2 text-md text-gray-600 hover:bg-cyan-600 hover:text-white w-full"
           >
             <LogOut size={16} className="mr-2" />
@@ -101,7 +126,15 @@ export default function Dashboard() {
           </button>
         </nav>
       </div>
-
+      {showConfirm && (
+        <ConfirmLogout
+          onConfirm={() => {
+            setShowConfirm(false);
+            handleLogout();
+          }}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
       {/* Overlay for mobile sidebar */}
       {sidebarOpen && (
         <div
