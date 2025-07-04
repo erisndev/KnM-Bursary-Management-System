@@ -154,7 +154,7 @@ const VALIDATION_RULES = {
       "Major must contain only letters, spaces, hyphens, and apostrophes",
   },
   institutionStartYear: {
-    required: false, // Becomes required if university enrolled
+    // Becomes required if university enrolled
     pattern: /^(19|20)\d{2}$/,
     message: "Please enter a valid year (e.g., 2020)",
   },
@@ -165,8 +165,8 @@ const VALIDATION_RULES = {
   },
   institutionGPA: {
     required: false,
-    pattern: /^[0-4](\.\d{1,2})?$/,
-    message: "GPA must be between 0.00 and 4.00",
+    pattern: /^(100(\.0{1,2})?|(\d{1,2})(\.\d{1,2})?)$/,
+    message: "GPA must be a percentage between 0 and 100",
   },
 
   // Household Information Fields
