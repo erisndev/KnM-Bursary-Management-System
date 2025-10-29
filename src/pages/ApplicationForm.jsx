@@ -1,29 +1,34 @@
-import React, { useEffect, useState } from "react";
-import baseAPI from "../../environment";
-import LearnerInformationForm from "@/components/ApplicationForm/LearnerInformationForm";
-import ApplicationExists from "@/components/ApplicationForm/ApplicationExists";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import LearnerInformationForm from '@/components/ApplicationForm/LearnerInformationForm';
+import ApplicationExists from '@/components/ApplicationForm/ApplicationExists';
+import api, { APIError } from '@/services/api';
+import { getUserId } from '@/services/auth';
+import logger from '@/utils/logger';
 
 const Apply = () => {
   const [userId, setUserId] = useState(null);
   const [hasApplication, setHasApplication] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
+    const storedUserId = getUserId();
     if (storedUserId) {
       setUserId(storedUserId);
-      // Check if user already applied by calling your backend
-      fetch(`${baseAPI}/applications/user/${storedUserId}`)
-        .then((res) => {
-          if (res.status === 404) {
-            // No application found
-            setHasApplication(false);
-          } else if (res.ok) {
-            setHasApplication(true);
-          }
+      
+      // Check if user already applied
+      api.applications
+        .getByUserId(storedUserId)
+        .then(() => {
+          setHasApplication(true);
         })
-        .catch((err) => {
-          console.error("Failed to check application:", err);
+        .catch((error) => {
+          if (error instanceof APIError && error.status === 404) {
+            setHasApplication(false);
+          } else {
+            logger.error('Failed to check application:', error);
+          }
         })
         .finally(() => {
           setLoading(false);

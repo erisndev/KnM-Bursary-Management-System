@@ -1,51 +1,29 @@
-import { useRef } from "react";
-import { Navigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { Navigate, useLocation } from 'react-router-dom';
+import { validateToken, getToken, clearAuth } from '@/services/auth';
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  const hasShownToast = useRef(false);
+  const location = useLocation();
+  const token = getToken();
+  const validation = validateToken(token);
 
-  console.log("Token:", token);
+  if (!validation.valid) {
+    // Clear invalid auth data
+    clearAuth();
 
-  if (!token) {
-    if (!hasShownToast.current) {
-      toast.error("You need to log in to access this page.");
-      hasShownToast.current = true;
-    }
+    // Navigate to login without showing toast here
+    // The Login page can show the message from state if needed
     return (
       <Navigate
         to="/login"
         replace
-        state={{ message: "You need to log in to access this page." }}
-      />
-    );
-  }
-
-  if (token === "expired") {
-    if (!hasShownToast.current) {
-      toast.error("Your session has expired. Please log in again.");
-      hasShownToast.current = true;
-    }
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{ message: "Your session has expired. Please log in again." }}
-      />
-    );
-  }
-
-  if (token === "invalid") {
-    if (!hasShownToast.current) {
-      toast.error("Your session is invalid. Please log in again.");
-      hasShownToast.current = true;
-    }
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{ message: "Your session is invalid. Please log in again." }}
+        state={{ 
+          from: location.pathname,
+          message: validation.reason === 'expired' 
+            ? 'Your session has expired. Please log in again.'
+            : validation.reason === 'invalid'
+            ? 'Your session is invalid. Please log in again.'
+            : 'You need to log in to access this page.'
+        }}
       />
     );
   }

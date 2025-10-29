@@ -806,6 +806,8 @@ export default function LearnerInformationForm() {
   /** Save current step to localStorage whenever it changes */
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.CURRENT_STEP, activeStep);
+    // Scroll to top when step changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeStep]);
 
   useEffect(() => {

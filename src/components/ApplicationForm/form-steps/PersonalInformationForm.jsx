@@ -14,20 +14,20 @@ import { AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const countries = [
-  { value: "za", label: "South Africa" },
-  { value: "us", label: "United States" },
-  { value: "ca", label: "Canada" },
-  { value: "uk", label: "United Kingdom" },
-  { value: "au", label: "Australia" },
-  { value: "de", label: "Germany" },
-  { value: "fr", label: "France" },
-  { value: "jp", label: "Japan" },
-  { value: "br", label: "Brazil" },
-  { value: "in", label: "India" },
-  { value: "ng", label: "Nigeria" },
-  { value: "ke", label: "Kenya" },
-  { value: "gh", label: "Ghana" },
-  { value: "eg", label: "Egypt" },
+  { value: "South Africa", label: "South Africa" },
+  { value: "United States", label: "United States" },
+  { value: "Canada", label: "Canada" },
+  { value: "United Kingdom", label: "United Kingdom" },
+  { value: "Australia", label: "Australia" },
+  { value: "Germany", label: "Germany" },
+  { value: "France", label: "France" },
+  { value: "Japan", label: "Japan" },
+  { value: "Brazil", label: "Brazil" },
+  { value: "India", label: "India" },
+  { value: "Nigeria", label: "Nigeria" },
+  { value: "Kenya", label: "Kenya" },
+  { value: "Ghana", label: "Ghana" },
+  { value: "Egypt", label: "Egypt" },
 ];
 
 export default function PersonalInformationForm({
