@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 import { HiMenu } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoIosLogOut } from "react-icons/io";
 import toast from "react-hot-toast";
+import * as jwt_decode from "jwt-decode";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,16 +22,64 @@ const Navbar = () => {
   ];
 
   useEffect(() => {
-    const checkAuthStatus = () => {
-      const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
+    const isTokenValid = (token) => {
+      if (!token) return false;
+
+      try {
+        const decoded = jwt_decode(token);
+        // If token has no exp, treat it as invalid for UI purposes
+        if (!decoded?.exp) return false;
+
+        const nowInSeconds = Math.floor(Date.now() / 1000);
+        return decoded.exp > nowInSeconds;
+      } catch (e) {
+        return false;
+      }
     };
 
+    const checkAuthStatus = () => {
+      const token = localStorage.getItem("token");
+      const valid = isTokenValid(token);
+
+      // If it's expired/invalid, clean up to keep UI consistent everywhere
+      if (!valid && token) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+
+      setIsLoggedIn(valid);
+    };
+
+    // Initial check on mount + route change
     checkAuthStatus();
+
+    // Keep in sync across tabs
     window.addEventListener("storage", checkAuthStatus);
+
+    // Auto-update when token expires while user stays on the same page
+    const token = localStorage.getItem("token");
+    let expiryTimer;
+
+    if (token) {
+      try {
+        const decoded = jwt_decode(token);
+        if (decoded?.exp) {
+          const msUntilExpiry = decoded.exp * 1000 - Date.now();
+          if (msUntilExpiry > 0) {
+            expiryTimer = setTimeout(checkAuthStatus, msUntilExpiry + 250);
+          } else {
+            // already expired
+            checkAuthStatus();
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
 
     return () => {
       window.removeEventListener("storage", checkAuthStatus);
+      if (expiryTimer) clearTimeout(expiryTimer);
     };
   }, [location]);
 
