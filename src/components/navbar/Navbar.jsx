@@ -5,7 +5,7 @@ import { IoClose } from "react-icons/io5";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoIosLogOut } from "react-icons/io";
 import toast from "react-hot-toast";
-import * as jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,7 +26,8 @@ const Navbar = () => {
       if (!token) return false;
 
       try {
-        const decoded = jwt_decode(token);
+        const decoded = jwtDecode(token);
+
         // If token has no exp, treat it as invalid for UI purposes
         if (!decoded?.exp) return false;
 
@@ -62,7 +63,8 @@ const Navbar = () => {
 
     if (token) {
       try {
-        const decoded = jwt_decode(token);
+        const decoded = jwtDecode(token);
+
         if (decoded?.exp) {
           const msUntilExpiry = decoded.exp * 1000 - Date.now();
           if (msUntilExpiry > 0) {
