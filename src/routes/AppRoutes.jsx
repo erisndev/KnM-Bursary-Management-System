@@ -1,72 +1,76 @@
-// src/routes/AppRoutes.jsx
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "../pages/Home";
-import ApplicationForm from "../pages/ApplicationForm";
 import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-import Contact from "../pages/Contact";
-import MainLayout from "@/Layouts/MainLayout";
+import LandingLayout from "@/Layouts/LandingLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PublicRoute from "@/components/PublicRoute";
 import ForgotPasswordFlow from "@/components/forgotPassword/ForgotPasswordFlow";
 
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* Public/Landing routes - redirect to dashboard if logged in */}
       <Route
         path="/"
         element={
-          <MainLayout>
-            <Home />
-          </MainLayout>
-        }
-      />
-      <Route
-        path="/apply"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <ApplicationForm />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Dashboard />
-            </MainLayout>
-          </ProtectedRoute>
+          <PublicRoute>
+            <LandingLayout>
+              <Home />
+            </LandingLayout>
+          </PublicRoute>
         }
       />
       <Route
         path="/login"
         element={
-          <MainLayout>
+          <PublicRoute>
             <Login />
-          </MainLayout>
+          </PublicRoute>
         }
       />
       <Route
         path="/register"
         element={
-          <MainLayout>
+          <PublicRoute>
             <Register />
-          </MainLayout>
+          </PublicRoute>
+        }
+      />
+      {/* /contact now redirects to home#contact section */}
+      <Route path="/contact" element={<Navigate to="/" replace />} />
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicRoute>
+            <ForgotPasswordFlow />
+          </PublicRoute>
         }
       />
 
+      {/* Protected/Dashboard routes - own layout, no landing navbar */}
       <Route
-        path="/contact"
+        path="/dashboard"
         element={
-          <MainLayout>
-            <Contact />
-          </MainLayout>
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
         }
       />
-      <Route path="/forgot-password" element={<ForgotPasswordFlow />} />
+
+      {/* Redirect /apply to dashboard (apply is now inside dashboard) */}
+      <Route
+        path="/apply"
+        element={
+          <ProtectedRoute>
+            <Navigate to="/dashboard?tab=apply" replace />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catch all - redirect to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

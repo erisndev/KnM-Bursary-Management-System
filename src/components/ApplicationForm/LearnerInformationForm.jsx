@@ -7,6 +7,7 @@ import RequiredDocumentsForm from "./form-steps/RequiredDocumentsForm";
 import SuccessMessage from "./form-steps/SuccessMessage";
 import baseAPI from "../../../environment";
 import { toast } from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 const STORAGE_KEYS = {
   FORM_DATA: "bursary_form_data",
@@ -831,17 +832,16 @@ export default function LearnerInformationForm() {
   const handleSelectChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
-    // Real-time validation for touched fields
-    if (touched[field]) {
-      const fieldError = validateField(field, value, {
-        ...formData,
-        [field]: value,
-      });
-      setErrors((prev) => ({
-        ...prev,
-        [field]: fieldError || "",
-      }));
-    }
+    // Always mark select as touched and validate with the NEW value immediately
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const fieldError = validateField(field, value, {
+      ...formData,
+      [field]: value,
+    });
+    setErrors((prev) => ({
+      ...prev,
+      [field]: fieldError || "",
+    }));
   };
 
   const handleBlur = (field) => {
@@ -1137,130 +1137,97 @@ export default function LearnerInformationForm() {
   if (isSubmitted) return <SuccessMessage />;
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 sm:p-6 bg-gray-100 rounded shadow-md">
-      {/* Header Section */}
-      <div className="flex justify-between items-center mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-semibold text-cyan-800 text-center flex-1">
-          Bursary Application Form
-        </h1>
-
-        {/* Clear Form Button */}
+    <div className="w-full max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Bursary Application
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Complete all steps to submit your application
+          </p>
+        </div>
         <button
           onClick={handleClearForm}
-          className="text-sm text-red-600 hover:text-red-800 underline"
+          className="text-xs text-red-500 hover:text-red-700 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
           title="Clear all form data"
         >
           Clear Form
         </button>
       </div>
 
-      {/* Progress Bar Section */}
-      <div className="mb-8 sm:mb-12">
-        <div className="relative">
-          {/* Background Progress Line */}
-          <div className="absolute top-6 left-0 w-full h-1 bg-gray-300 rounded-full" />
-
-          {/* Active Progress Line */}
+      {/* Step Progress */}
+      <div className="mb-10">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            Step {activeStep + 1} of {FORM_STEPS.length}
+          </span>
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            {Math.round(((activeStep) / (FORM_STEPS.length - 1)) * 100)}% complete
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 mb-6">
           <div
-            className="absolute top-6 left-0 h-1 bg-cyan-600 rounded-full transition-all duration-300 ease-in-out"
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 h-1.5 rounded-full transition-all duration-500 ease-out"
             style={{
               width: `${(activeStep / (FORM_STEPS.length - 1)) * 100}%`,
             }}
           />
+        </div>
+        <div className="flex justify-between">
+          {FORM_STEPS.map((step, index) => {
+            const isCompleted = stepCompletionStatus[index];
+            const isCurrent = index === activeStep;
+            const isAccessible =
+              index <= activeStep ||
+              stepCompletionStatus.slice(0, index).every((s) => s);
 
-          {/* Step Indicators */}
-          <div className="relative flex justify-between">
-            {FORM_STEPS.map((step, index) => (
-              <div
+            return (
+              <button
                 key={index}
-                className="flex flex-col items-center cursor-pointer group"
                 onClick={() => handleStepClick(index)}
+                disabled={!isAccessible}
+                className={cn(
+                  "flex flex-col items-center gap-2 group transition-all",
+                  !isAccessible && "opacity-40 cursor-not-allowed"
+                )}
               >
-                {/* Step Circle */}
                 <div
-                  className={`
-                    w-12 h-12 rounded-full border-4 flex items-center justify-center text-sm font-semibold 
-                    transition-all duration-300 relative
-                    ${
-                      index <= activeStep
-                        ? stepCompletionStatus[index]
-                          ? "bg-green-600 border-green-600 text-white" // Completed
-                          : index === activeStep
-                          ? "bg-cyan-600 border-cyan-600 text-white" // Current
-                          : "bg-yellow-500 border-yellow-500 text-white" // Incomplete but accessible
-                        : stepCompletionStatus[index]
-                        ? "bg-green-600 border-green-600 text-white" // Completed future step
-                        : "bg-white border-gray-300 text-gray-500 group-hover:border-cyan-500" // Future step
-                    }
-                    ${
-                      // Disable future steps that can't be accessed
-                      index > activeStep &&
-                      !stepCompletionStatus
-                        .slice(0, index)
-                        .every((status) => status)
-                        ? "cursor-not-allowed opacity-50"
-                        : "cursor-pointer"
-                    }
-                  `}
+                  className={cn(
+                    "w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all",
+                    isCompleted
+                      ? "bg-emerald-500 border-emerald-500 text-white"
+                      : isCurrent
+                      ? "bg-violet-600 border-violet-600 text-white"
+                      : "bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 text-gray-400 dark:text-gray-500"
+                  )}
                 >
-                  {stepCompletionStatus[index] ? (
-                    // Checkmark for completed steps
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
+                  {isCompleted ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
-                    // Step number
-                    <span>{index + 1}</span>
-                  )}
-
-                  {/* Warning indicator for incomplete required steps */}
-                  {index < activeStep && !stepCompletionStatus[index] && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">!</span>
-                    </div>
+                    index + 1
                   )}
                 </div>
-
-                {/* Step Label */}
-                <div className="mt-3 text-center">
-                  <div
-                    className={`
-                      text-sm font-medium transition-colors duration-300
-                      ${
-                        index === activeStep ? "text-cyan-700" : "text-gray-500"
-                      }
-                    `}
-                  >
-                    <span className="hidden sm:inline">{step.label}</span>
-                    <span className="sm:hidden">{step.shortLabel}</span>
-                  </div>
-
-                  {/* Completion Status */}
-                  {stepCompletionStatus[index] && (
-                    <div className="text-xs text-green-600 mt-1">Complete</div>
+                <span
+                  className={cn(
+                    "text-[10px] sm:text-xs font-medium text-center leading-tight",
+                    isCurrent ? "text-violet-700 dark:text-violet-400" : "text-gray-400 dark:text-gray-500"
                   )}
-                  {index <= activeStep && !stepCompletionStatus[index] && (
-                    <div className="text-xs text-red-600 mt-1">Incomplete</div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+                >
+                  <span className="hidden sm:inline">{step.label}</span>
+                  <span className="sm:hidden">{step.shortLabel}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Form Content Section */}
-      <div>
+      {/* Form Card */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm p-6 sm:p-8 transition-colors duration-300">
         {activeStep === 0 && (
           <PersonalInformationForm
             {...commonFormProps}
@@ -1290,37 +1257,49 @@ export default function LearnerInformationForm() {
         )}
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4 mt-10 sm:mt-16">
-        <Button
-          className="bg-gray-200 text-md w-full sm:w-[200px] text-black border-gray-500"
-          variant="outline"
-          disabled={activeStep === 0 || isSubmitting}
-          onClick={handlePrevious}
-        >
-          Previous
-        </Button>
-
-        {activeStep < 3 && (
+      {/* Navigation */}
+      <div className="flex items-center justify-between mt-8">
+        {activeStep > 0 ? (
           <Button
-            className="bg-cyan-800 hover:bg-cyan-700 cursor-pointer w-full sm:w-[200px] text-md"
+            variant="outline"
+            disabled={isSubmitting}
+            onClick={handlePrevious}
+            className="px-6 border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+          >
+            ← Previous
+          </Button>
+        ) : (
+          <div />
+        )}
+
+        {activeStep < 3 ? (
+          <Button
+            className="px-8 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-md shadow-violet-500/20"
             disabled={isSubmitting}
             onClick={handleNext}
           >
-            Save and Continue
+            Continue →
           </Button>
-        )}
-
-        {activeStep === 3 && (
+        ) : (
           <Button
             disabled={isSubmitting}
             onClick={handleSubmit}
-            className="bg-cyan-800 hover:bg-cyan-700 text-white w-full sm:w-[200px] text-md"
-          >
-            {isSubmitting ? "Submitting..." : "Submit"}
-          </Button>
-        )}
-      </div>
+            className="px-8 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-md shadow-violet-500/20"
+            >
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Submitting...
+                </span>
+              ) : (
+                "Submit Application"
+              )}
+            </Button>
+          )}
+        </div>
     </div>
   );
 }

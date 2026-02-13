@@ -1,120 +1,71 @@
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useCallback } from "react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  /** Scroll to a section on the landing page without showing # in URL */
+  const scrollTo = useCallback(
+    (sectionId) => {
+      if (location.pathname === "/") {
+        const el = document.getElementById(sectionId);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      } else {
+        navigate("/");
+        setTimeout(() => {
+          const el = document.getElementById(sectionId);
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+        }, 200);
+      }
+    },
+    [location.pathname, navigate],
+  );
 
   return (
-    <footer className="bg-gray-100 pt-28 text-gray-700 py-10 mb-[-20px] px-4 sm:px-6 lg:px-12">
-      <div className="max-w-7xl mx-auto">
-        {/* Brand + Newsletter */}
-        <div className="text-center mb-16 px-2">
-          <h2 className="text-2xl sm:text-3xl font-semibold text-cyan-700">
-            KnM Bursary
-          </h2>
-          <p className="mt-4 font-medium text-sm sm:text-base">
-            Stay updated with new bursary opportunities
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center mt-4 gap-3 max-w-lg mx-auto">
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              className="rounded-md h-10 sm:h-10 min-h-[2.5rem] bg-white flex-1"
-            />
-            <Button className="h-10 sm:h-10 min-h-[2.5rem] bg-cyan-700 hover:bg-cyan-800 cursor-pointer w-full sm:w-auto">
-              Subscribe
-            </Button>
+    <footer className="bg-gray-900 dark:bg-slate-950 text-gray-300 border-t border-gray-800 dark:border-slate-800 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="col-span-2 md:col-span-1">
+            <img src="./Logo.png" alt="KNP Bursary" className="h-10 w-auto mb-4 brightness-0 invert" />
+            <p className="text-sm text-gray-400 leading-relaxed">
+              Empowering students through accessible educational funding opportunities.
+            </p>
           </div>
-        </div>
-        {/* Footer Links */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm text-center sm:text-left px-2">
           <div>
-            <h3 className="font-semibold mb-4 text-cyan-700">Explore</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#">Bursaries</a>
-              </li>
-              <li>
-                <a href="#">Universities</a>
-              </li>
-              <li>
-                <a href="#">Courses</a>
-              </li>
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Quick Links</h3>
+            <ul className="space-y-2.5">
+              <li><Link to="/" className="text-sm text-gray-400 hover:text-violet-400 transition-colors">Home</Link></li>
+              <li><button onClick={() => scrollTo("about")} className="text-sm text-gray-400 hover:text-violet-400 transition-colors">About</button></li>
+              <li><button onClick={() => scrollTo("how-to-apply")} className="text-sm text-gray-400 hover:text-violet-400 transition-colors">How to Apply</button></li>
+              <li><button onClick={() => scrollTo("contact")} className="text-sm text-gray-400 hover:text-violet-400 transition-colors">Contact</button></li>
             </ul>
           </div>
-
           <div>
-            <h3 className="font-semibold mb-4 text-cyan-700">About</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#">Our Mission</a>
-              </li>
-              <li>
-                <a href="#">Team</a>
-              </li>
-              <li>
-                <a href="#">Contact Us</a>
-              </li>
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Resources</h3>
+            <ul className="space-y-2.5">
+              <li><span className="text-sm text-gray-400 cursor-default">FAQ</span></li>
+              <li><span className="text-sm text-gray-400 cursor-default">Privacy Policy</span></li>
+              <li><span className="text-sm text-gray-400 cursor-default">Terms of Service</span></li>
             </ul>
           </div>
-
           <div>
-            <h3 className="font-semibold mb-4 text-cyan-700">Resources</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#">FAQ</a>
-              </li>
-              <li>
-                <a href="#">Blog</a>
-              </li>
-              <li>
-                <a href="#">Guides</a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold mb-4 text-cyan-700">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#">Privacy Policy</a>
-              </li>
-              <li>
-                <a href="#">Terms of Service</a>
-              </li>
-              <li>
-                <a href="#">Disclaimer</a>
-              </li>
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Contact</h3>
+            <ul className="space-y-2.5">
+              <li className="text-sm text-gray-400">150 Bryanston Drive</li>
+              <li className="text-sm text-gray-400">Sandton, 2191</li>
+              <li className="text-sm text-gray-400">011-462-6269</li>
+              <li><a href="mailto:info@knpbursary.co.za" className="text-sm text-gray-400 hover:text-violet-400 transition-colors">info@knpbursary.co.za</a></li>
             </ul>
           </div>
         </div>
-        {/* Bottom Footer */}
-        <div className="mt-12 border-t pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4 text-center sm:text-left">
-          {/* Language selector */}
-          <div>
-            <button className="border rounded px-3 py-1 hover:bg-gray-200 transition">
-              English
-            </button>
-          </div>
-
-          {/* Copyright */}
-          <div>
-            © {currentYear} KnM Bursary • <a href="#">Contact</a> •{" "}
-            <a href="#">Support</a> • <a href="#">Careers</a>
-          </div>
-
-          {/* Icons */}
-          <div className="flex justify-center sm:justify-end gap-4 text-lg">
-            <span role="img" aria-label="User">
-              👤
-            </span>
-            <span role="img" aria-label="Bell">
-              🛎️
-            </span>
-            <span role="img" aria-label="Document">
-              📄
-            </span>
+        <div className="py-6 border-t border-gray-800 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-gray-500">© {currentYear} KNP Bursary. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <span className="text-xs text-gray-500">Privacy</span>
+            <span className="text-xs text-gray-500">Terms</span>
+            <span className="text-xs text-gray-500">Support</span>
           </div>
         </div>
       </div>

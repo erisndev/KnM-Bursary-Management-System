@@ -1,5 +1,79 @@
-import FileUploadField from "@/components/ui/file-upload-field";
-import { X } from "lucide-react";
+import { X, Upload, FileText, AlertCircle } from "lucide-react";
+
+const FileUploadCard = ({
+  title,
+  description,
+  docType,
+  documents,
+  handleFileUpload,
+  handleFileRemove,
+  acceptedFormats,
+  error,
+  required = false,
+}) => {
+  const document = documents[docType];
+
+  return (
+    <div className="border border-gray-200 dark:border-slate-700 rounded-xl p-5 hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            {title}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>
+        </div>
+      </div>
+
+      {document?.uploaded ? (
+        <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg flex items-center justify-center flex-shrink-0">
+              <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <span className="text-sm text-emerald-800 dark:text-emerald-300 truncate">
+              {document.file.name}
+            </span>
+          </div>
+          <button
+            onClick={() => handleFileRemove(docType)}
+            className="p-1.5 text-gray-400 dark:text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ) : (
+        <div>
+          <label
+            htmlFor={docType}
+            className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-lg cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 hover:bg-violet-50/30 dark:hover:bg-violet-900/20 transition-all group"
+          >
+            <Upload className="w-8 h-8 text-gray-300 dark:text-gray-600 dark:text-gray-400 group-hover:text-violet-500 dark:group-hover:text-violet-400 mb-2 transition-colors" />
+            <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 font-medium">
+              Click to upload
+            </span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 mt-1">
+              {acceptedFormats} (Max: 10MB)
+            </span>
+          </label>
+          <input
+            type="file"
+            id={docType}
+            className="hidden"
+            accept={acceptedFormats}
+            onChange={(e) => handleFileUpload(docType, e)}
+          />
+          {error && (
+            <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3 flex-shrink-0" />
+              {error}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function RequiredDocumentsForm({
   documents,
@@ -11,206 +85,102 @@ export default function RequiredDocumentsForm({
   touched,
 }) {
   return (
-    <>
-      <h2 className="text-xl font-semibold mb-2 text-center">
-        Required Documents
-      </h2>
-      <p className="text-gray-500 text-sm mb-12 text-center">
-        Please upload the necessary documents to support your application.
-        Ensure all files meet the specified format requirements.
-      </p>
-
-      <FileUploadField
-        title={
-          <>
-            Academic Transcript
-            <span className="text-red-500 ml-1">*</span>
-          </>
-        }
-        description="Submit your latest academic transcript. Ensure all subjects are visible."
-        docType="transcript"
-        secondaryDocType="degreeCertificate"
-        documents={documents}
-        handleFileUpload={handleFileUpload}
-        handleFileRemove={handleFileRemove}
-        acceptedFormats=".pdf,.jpg,.jpeg,.png,.txt"
-        error={
-          touched.transcript && errors.transcript ? errors.transcript : null
-        }
-        required={true}
-      />
-
-      <FileUploadField
-        title={
-          <>
-            Proof of Identification
-            <span className="text-red-500 ml-1">*</span>
-          </>
-        }
-        description="Submit a government-issued identification document."
-        docType="nationalIdCard"
-        documents={documents}
-        handleFileUpload={handleFileUpload}
-        handleFileRemove={handleFileRemove}
-        acceptedFormats=".pdf,.jpg,.jpeg,.png"
-        error={
-          touched.nationalIdCard && errors.nationalIdCard
-            ? errors.nationalIdCard
-            : null
-        }
-        required={true}
-      />
-
-      <FileUploadField
-        title={
-          <>
-            Proof of Residence
-            <span className="text-red-500 ml-1">*</span>
-          </>
-        }
-        description="Submit a document proving your current residential address (e.g., utility bill, bank statement)."
-        docType="proofOfResidence"
-        documents={documents}
-        handleFileUpload={handleFileUpload}
-        handleFileRemove={handleFileRemove}
-        acceptedFormats=".pdf,.jpg,.jpeg,.png"
-        error={
-          touched.proofOfResidence && errors.proofOfResidence
-            ? errors.proofOfResidence
-            : null
-        }
-        required={true}
-      />
-
-      <FileUploadField
-        title="Letter of Recommendation"
-        description="Submit a letter of recommendation from a teacher or employer."
-        docType="letterOfRecommendation"
-        secondaryDocType="recommendationTranscript"
-        documents={documents}
-        handleFileUpload={handleFileUpload}
-        handleFileRemove={handleFileRemove}
-        acceptedFormats=".pdf,.doc,.docx"
-        required={false}
-        optional={true}
-      />
-
-      <FileUploadField
-        title={
-          <>
-            Proof of Bank Account
-            <span className="text-red-500 ml-1">*</span>
-          </>
-        }
-        description="Provide a copy of your proof of bank account."
-        docType="proofOfBankAccount"
-        documents={documents}
-        handleFileUpload={handleFileUpload}
-        handleFileRemove={handleFileRemove}
-        acceptedFormats=".pdf,.doc,.docx"
-        error={
-          touched.proofOfBankAccount && errors.proofOfBankAccount
-            ? errors.proofOfBankAccount
-            : null
-        }
-        required={true}
-      />
-
-      <FileUploadField
-        title="Cover Letter"
-        description="Include an optional cover letter to support your application."
-        docType="coverLetter"
-        documents={documents}
-        handleFileUpload={handleFileUpload}
-        handleFileRemove={handleFileRemove}
-        acceptedFormats=".pdf,.doc,.docx"
-        required={false}
-        optional={true}
-      />
-
-      {/* Proof of Income Section */}
-      <div className="mb-8 p-6 bg-white rounded-md shadow-sm">
-        <h3 className="text-md font-semibold mb-1">
-          Proof of Income (Optional)
-        </h3>
-        <p className="text-xs text-gray-500 mb-4">
-          Submit documents to verify your income for financial aid
-          consideration.
+    <div>
+      <div className="text-center mb-8">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          Required Documents
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 mt-1">
+          Upload the necessary documents to support your application.
         </p>
-
-        {!documents.payslip.uploaded && (
-          <div className="border-2 border-dashed border-gray-200 rounded-md p-6 flex flex-col items-center justify-center mb-4">
-            <div className="h-16 w-16 bg-gray-200 rounded-md mb-2"></div>
-            <p className="text-sm text-center text-gray-500 mb-2">
-              Drag and drop files here, or click to upload
-            </p>
-            <p className="text-xs text-center text-gray-400">
-              Accepted formats: PDF, JPG, PNG (Max: 5MB)
-            </p>
-            <input
-              type="file"
-              id="payslip"
-              className="hidden"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => handleFileUpload("payslip", e)}
-            />
-            <label
-              htmlFor="payslip"
-              className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-            >
-              Browse files
-            </label>
-          </div>
-        )}
-
-        {documents.payslip.uploaded && (
-          <>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-              <div className="flex items-center">
-                <div className="h-8 w-8 bg-cyan-100 rounded-md flex items-center justify-center mr-3">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-cyan-600"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <span className="text-sm">{documents.payslip.file.name}</span>
-              </div>
-              <button
-                onClick={() => handleFileRemove("payslip")}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="mt-4">
-              <input
-                type="file"
-                id="additionalPayslip"
-                className="hidden"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => {
-                  handleAdditionalDocUpload(additionalDocs.length, e);
-                }}
-              />
-              <label
-                htmlFor="additionalPayslip"
-                className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-              >
-                Add another file
-              </label>
-            </div>
-          </>
-        )}
       </div>
-    </>
+
+      <div className="space-y-4">
+        <FileUploadCard
+          title="Academic Transcript"
+          description="Submit your latest academic transcript with all subjects visible."
+          docType="transcript"
+          documents={documents}
+          handleFileUpload={handleFileUpload}
+          handleFileRemove={handleFileRemove}
+          acceptedFormats=".pdf,.jpg,.jpeg,.png"
+          error={touched.transcript && errors.transcript ? errors.transcript : null}
+          required={true}
+        />
+
+        <FileUploadCard
+          title="Proof of Identification"
+          description="Submit a government-issued identification document."
+          docType="nationalIdCard"
+          documents={documents}
+          handleFileUpload={handleFileUpload}
+          handleFileRemove={handleFileRemove}
+          acceptedFormats=".pdf,.jpg,.jpeg,.png"
+          error={touched.nationalIdCard && errors.nationalIdCard ? errors.nationalIdCard : null}
+          required={true}
+        />
+
+        <FileUploadCard
+          title="Proof of Residence"
+          description="Submit a document proving your current residential address."
+          docType="proofOfResidence"
+          documents={documents}
+          handleFileUpload={handleFileUpload}
+          handleFileRemove={handleFileRemove}
+          acceptedFormats=".pdf,.jpg,.jpeg,.png"
+          error={touched.proofOfResidence && errors.proofOfResidence ? errors.proofOfResidence : null}
+          required={true}
+        />
+
+        <FileUploadCard
+          title="Proof of Bank Account"
+          description="Provide a copy of your proof of bank account."
+          docType="proofOfBankAccount"
+          documents={documents}
+          handleFileUpload={handleFileUpload}
+          handleFileRemove={handleFileRemove}
+          acceptedFormats=".pdf,.jpg,.jpeg,.png"
+          error={touched.proofOfBankAccount && errors.proofOfBankAccount ? errors.proofOfBankAccount : null}
+          required={true}
+        />
+
+        <div className="pt-4 border-t border-gray-100 dark:border-slate-700">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+            Optional Documents
+          </p>
+          <div className="space-y-4">
+            <FileUploadCard
+              title="Letter of Recommendation"
+              description="Submit a letter of recommendation from a teacher or employer."
+              docType="letterOfRecommendation"
+              documents={documents}
+              handleFileUpload={handleFileUpload}
+              handleFileRemove={handleFileRemove}
+              acceptedFormats=".pdf,.doc,.docx"
+            />
+
+            <FileUploadCard
+              title="Cover Letter"
+              description="Include an optional cover letter to support your application."
+              docType="coverLetter"
+              documents={documents}
+              handleFileUpload={handleFileUpload}
+              handleFileRemove={handleFileRemove}
+              acceptedFormats=".pdf,.doc,.docx"
+            />
+
+            <FileUploadCard
+              title="Proof of Income"
+              description="Submit documents to verify income for financial aid consideration."
+              docType="payslip"
+              documents={documents}
+              handleFileUpload={handleFileUpload}
+              handleFileRemove={handleFileRemove}
+              acceptedFormats=".pdf,.jpg,.jpeg,.png"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

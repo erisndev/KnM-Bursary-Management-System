@@ -229,19 +229,19 @@ const ForgotPasswordFlow = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-cyan-600 rounded-full mb-4">
             {getStepIcon()}
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             {getStepTitle()}
           </h1>
-          <p className="text-gray-600">{getStepDescription()}</p>
+          <p className="text-gray-600 dark:text-gray-400">{getStepDescription()}</p>
         </div>
 
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Step {step} of 3
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               {Math.round((step / 3) * 100)}%
             </span>
           </div>
@@ -254,12 +254,12 @@ const ForgotPasswordFlow = () => {
         </div>
 
         {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-8">
           {/* Back Button */}
           {step > 1 && !loading && (
             <button
               onClick={handleBackStep}
-              className="flex items-center text-gray-600 hover:text-gray-800 mb-6 transition-colors"
+              className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
@@ -287,7 +287,7 @@ const ForgotPasswordFlow = () => {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Email Address
                 </label>
@@ -328,7 +328,7 @@ const ForgotPasswordFlow = () => {
               <div>
                 <label
                   htmlFor="code"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Verification Code
                 </label>
@@ -348,7 +348,7 @@ const ForgotPasswordFlow = () => {
                     maxLength={6}
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                   Didn't receive the code? Check your spam folder or{" "}
                   <button
                     type="button"
@@ -382,7 +382,7 @@ const ForgotPasswordFlow = () => {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
                   New Password
                 </label>
@@ -476,7 +476,7 @@ const ForgotPasswordFlow = () => {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Remember your password?{" "}
             <a
               href="/login"

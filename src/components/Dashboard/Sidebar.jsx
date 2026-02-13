@@ -1,17 +1,11 @@
-/* eslint-disable no-unused-vars */
 import {
-  Home,
+  LayoutDashboard,
+  FileText,
   User,
   LogOut,
   X,
-  Settings,
-  HelpCircle,
-  FileText,
-  Award,
+  GraduationCap,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { clearAuth } from "@/services/auth";
 
 const Sidebar = ({
   activePage,
@@ -20,21 +14,10 @@ const Sidebar = ({
   setSidebarOpen,
   setShowConfirm,
 }) => {
-  const navigate = useNavigate();
-
   const menuItems = [
-    {
-      id: "applications",
-      label: "Application",
-      icon: Home,
-      description: "View your applications",
-    },
-    {
-      id: "profile",
-      label: "My Profile",
-      icon: User,
-      description: "Manage your information",
-    },
+    { id: "applications", label: "My Application", icon: LayoutDashboard, color: "violet" },
+    { id: "apply", label: "Apply", icon: FileText, color: "cyan" },
+    { id: "profile", label: "Profile", icon: User, color: "emerald" },
   ];
 
   const handleMenuClick = (itemId) => {
@@ -43,132 +26,89 @@ const Sidebar = ({
   };
 
   return (
-    <>
-      {/* Sidebar */}
-      <aside
-        className={`fixed top-16 left-0 h-[calc(100vh-4rem)] w-80 bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col z-50
-         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-         md:translate-x-0 md:z-40 md:w-72 lg:w-80`}
-      >
-        {/* Sidebar Header */}
-        <div className="flex-shrink-0 p-6 bg-gradient-to-br from-cyan-600 via-cyan-700 to-blue-600 relative overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -mr-20 -mt-20"></div>
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full -ml-16 -mb-16"></div>
+    <aside
+      className={`fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 flex flex-col z-50 transition-all duration-300 ease-in-out
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0`}
+    >
+      {/* Logo */}
+      <div className="h-16 flex items-center justify-between px-5 border-b border-gray-200 dark:border-slate-800 flex-shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-violet-500/20">
+            <GraduationCap className="w-5 h-5 text-white" />
           </div>
-
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
-                <Award className="w-7 h-7 text-cyan-600" />
-              </div>
-              <div>
-                <h2 className="text-white font-bold text-xl">KNP Bursary</h2>
-                <p className="text-cyan-100 text-sm font-medium">
-                  Student Portal
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="md:hidden text-white hover:bg-white/20 p-2 rounded-xl transition-all hover:rotate-90 duration-300"
-              aria-label="Close sidebar"
-            >
-              <X size={22} />
-            </button>
+          <div>
+            <span className="text-sm font-bold text-gray-900 dark:text-white">KNP Bursary</span>
+            <span className="block text-[10px] text-gray-400 dark:text-gray-500 dark:text-gray-400 -mt-0.5">Student Portal</span>
           </div>
         </div>
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="lg:hidden p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          aria-label="Close sidebar"
+        >
+          <X size={18} />
+        </button>
+      </div>
 
-        {/* Navigation Menu */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-2 min-h-0">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-2">
-              Main Menu
-            </p>
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activePage === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleMenuClick(item.id)}
-                  className={`w-full group relative overflow-hidden rounded-2xl transition-all duration-300 ${
-                    isActive
-                      ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-200 scale-[1.02]"
-                      : "text-gray-700 hover:bg-gray-50 hover:scale-[1.01]"
-                  }`}
-                >
-                  <div className="flex items-center space-x-4 px-4 py-4">
-                    <div
-                      className={`p-2 rounded-xl transition-all ${
-                        isActive
-                          ? "bg-white/20"
-                          : "bg-gray-100 group-hover:bg-cyan-50"
-                      }`}
-                    >
-                      <Icon
-                        size={20}
-                        className={isActive ? "text-white" : "text-cyan-600"}
-                      />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p
-                        className={`font-semibold text-sm ${
-                          isActive ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {item.label}
-                      </p>
-                      <p
-                        className={`text-xs ${
-                          isActive ? "text-cyan-100" : "text-gray-500"
-                        }`}
-                      >
-                        {item.description}
-                      </p>
-                    </div>
-                    {isActive && (
-                      <div className="w-1.5 h-8 bg-white rounded-full"></div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-4 px-3">
+        <div className="space-y-1">
+          <p className="px-3 mb-3 text-[10px] font-semibold text-gray-400 dark:text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Menu
+          </p>
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activePage === item.id;
+            const activeColors = {
+              violet: "bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-800",
+              cyan: "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800",
+              emerald: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+            };
+            const iconColors = {
+              violet: "text-violet-600 dark:text-violet-400",
+              cyan: "text-cyan-600 dark:text-cyan-400",
+              emerald: "text-emerald-600 dark:text-emerald-400",
+            };
 
-          {/* Quick Actions */}
-          {/* <div className="pt-4 space-y-1">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-2">
-              Quick Actions
-            </p>
-            <button
-              onClick={() => toast.info("Help center coming soon!")}
-              className="w-full flex items-center space-x-4 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-all hover:scale-[1.01]"
-            >
-              <div className="p-2 bg-gray-100 rounded-xl">
-                <HelpCircle size={18} className="text-gray-600" />
-              </div>
-              <span className="text-sm font-medium">Help & Support</span>
-            </button>
-          </div> */}
-        </nav>
-
-        {/* Sidebar Footer */}
-        <div className="flex-shrink-0 p-4 border-t border-gray-100 bg-gradient-to-br from-gray-50 to-white">
-          <button
-            onClick={() => setShowConfirm(true)}
-            className="w-full flex items-center justify-center space-x-3 px-4 py-3.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-2xl font-semibold transition-all hover:shadow-md hover:scale-[1.02] group"
-          >
-            <LogOut
-              size={20}
-              className="group-hover:rotate-12 transition-transform"
-            />
-            <span>Logout</span>
-          </button>
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleMenuClick(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? `${activeColors[item.color]} border`
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white border border-transparent"
+                }`}
+              >
+                <Icon
+                  size={18}
+                  className={isActive ? iconColors[item.color] : "text-gray-400 dark:text-gray-500"}
+                />
+                <span>{item.label}</span>
+                {isActive && (
+                  <div className={`ml-auto w-1.5 h-1.5 rounded-full ${
+                    item.color === "violet" ? "bg-violet-500" :
+                    item.color === "cyan" ? "bg-cyan-500" : "bg-emerald-500"
+                  }`} />
+                )}
+              </button>
+            );
+          })}
         </div>
-      </aside>
-    </>
+      </nav>
+
+      {/* Footer */}
+      <div className="p-3 border-t border-gray-200 dark:border-slate-800 flex-shrink-0">
+        <button
+          onClick={() => setShowConfirm(true)}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border border-transparent hover:border-red-100 dark:hover:border-red-900/40"
+        >
+          <LogOut size={18} />
+          <span>Log Out</span>
+        </button>
+      </div>
+    </aside>
   );
 };
 

@@ -152,7 +152,7 @@ export default function SupportingDocuments({
 
   return (
     <Card className="w-full  mx-auto">
-      <CardHeader className="bg-gray-50">
+      <CardHeader className="bg-gray-50 dark:bg-slate-800">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <CardTitle className="text-lg">Supporting Documents</CardTitle>
           {canUpdate && !isEditing && (
@@ -190,9 +190,9 @@ export default function SupportingDocuments({
 
         {/* Main Documents */}
         <div className="space-y-3">
-          <h4 className="font-medium text-gray-700">Required Documents</h4>
+          <h4 className="font-medium text-gray-700 dark:text-gray-300">Required Documents</h4>
           {submittedDocs.length === 0 && !isEditing ? (
-            <p className="text-gray-500 text-sm">No documents uploaded.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">No documents uploaded.</p>
           ) : (
             <div className="space-y-2">
               {/* Show existing documents */}
@@ -210,7 +210,7 @@ export default function SupportingDocuments({
                     className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2 border-b gap-2"
                   >
                     <div className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-gray-600" />
+                      <FileText className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                       <span className="text-sm text-gray-800">{label}</span>
                       {selectedFiles[docType] && (
                         <span className="text-xs text-cyan-600 bg-cyan-50 px-2 py-1 rounded">
@@ -276,7 +276,7 @@ export default function SupportingDocuments({
               {/* Show additional documents */}
               {additionalDocs.length > 0 && (
                 <div className="mt-4">
-                  <h4 className="font-medium text-gray-700 mb-2">
+                  <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Additional Documents
                   </h4>
                   {additionalDocs.map((filePath, index) => {
@@ -288,7 +288,7 @@ export default function SupportingDocuments({
                         className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2 border-b gap-2"
                       >
                         <div className="flex items-center gap-2">
-                          <FileText className="w-5 h-5 text-gray-600" />
+                          <FileText className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                           <span className="text-sm text-gray-800">
                             Additional Document {index + 1}
                           </span>
@@ -321,14 +321,14 @@ export default function SupportingDocuments({
         {/* File Selection Area for New Documents */}
         {isEditing && (
           <div className="space-y-4 pt-4 border-t">
-            <h4 className="font-medium text-gray-700">Upload New Documents</h4>
+            <h4 className="font-medium text-gray-700 dark:text-gray-300">Upload New Documents</h4>
 
             {/* Show available document types that haven't been selected */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {Object.entries(docTypeLabels).map(([docType, label]) => (
                 <div key={docType} className="border rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2 gap-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {label}
                     </label>
                     {selectedFiles[docType] && (

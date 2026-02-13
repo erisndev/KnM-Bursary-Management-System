@@ -15,33 +15,33 @@ export default function HigherEducation({ data }) {
 
   return (
     <Card>
-      <CardHeader className="bg-gray-50">
+      <CardHeader className="bg-gray-50 dark:bg-slate-800">
         <CardTitle className="text-lg">Higher Education</CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
         <div>
-          <p className="text-sm font-medium text-gray-500">Institution Name:</p>
-          <p className="text-gray-900">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Institution Name:</p>
+          <p className="text-gray-900 dark:text-white">
             {data.institutionName || "Not provided"}
           </p>
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-500">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
             Qualification Name:
           </p>
-          <p className="text-gray-900">
+          <p className="text-gray-900 dark:text-white">
             {data.institutionDegreeName || "Not provided"}
           </p>
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-500">Faculty:</p>
-          <p className="text-gray-900">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Faculty:</p>
+          <p className="text-gray-900 dark:text-white">
             {data.institutionMajor || "Not provided"}
           </p>
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-500">Current Year:</p>
-          <p className="text-gray-900">{getCurrentYearText()}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Current Year:</p>
+          <p className="text-gray-900 dark:text-white">{getCurrentYearText()}</p>
         </div>
       </CardContent>
     </Card>

@@ -1,4 +1,3 @@
-import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,6 +8,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { AlertCircle } from "lucide-react";
 
 const genderOptions = [
   { value: "female", label: "Female" },
@@ -40,6 +40,16 @@ const incomeRanges = [
   { value: "100001+", label: "R100,001+" },
 ];
 
+const FieldError = ({ show, message }) => {
+  if (!show || !message) return null;
+  return (
+    <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+      <AlertCircle className="w-3 h-3 flex-shrink-0" />
+      {message}
+    </p>
+  );
+};
+
 export default function HouseholdInformationForm({
   formData,
   handleInputChange,
@@ -47,35 +57,33 @@ export default function HouseholdInformationForm({
   handleBlur,
   errors,
   touched,
-  focusRef,
 }) {
+  
   return (
-    <div className="w-full max-w-6xl mx-auto ">
-      <h2 className="text-xl font-semibold mb-2 text-center">
-        Household Information
-      </h2>
-      <p className="text-gray-500 text-sm mb-12 text-center">
-        Please provide details about your household.
-      </p>
+    <div className="w-full max-w-6xl mx-auto">
+      <div className="text-center mb-8">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          Household Information
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Please provide details about your household.
+        </p>
+      </div>
 
-      <div className="mb-6">
-        <Label htmlFor="numberOfMembers" className="flex">
-          Number of household members{" "}
-          <span className="text-red-500 ml-1">*</span>
+      <div className="mb-8">
+        <Label htmlFor="numberOfMembers" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Number of household members <span className="text-red-500">*</span>
         </Label>
         <Select
-          value={formData.numberOfMembers}
-          onValueChange={(value) => {
-            handleSelectChange("numberOfMembers", value);
-            handleBlur("numberOfMembers");
-          }}
+          value={formData.numberOfMembers || undefined}
+          onValueChange={(value) => handleSelectChange("numberOfMembers", value)}
         >
           <SelectTrigger
             id="numberOfMembers"
             className={cn(
               "mt-1 w-full",
               touched.numberOfMembers && errors.numberOfMembers
-                ? "border-red-500 focus-visible:ring-red-500"
+                ? "border-red-300"
                 : ""
             )}
           >
@@ -90,20 +98,18 @@ export default function HouseholdInformationForm({
             <SelectItem value="10+">10+</SelectItem>
           </SelectContent>
         </Select>
-        {touched.numberOfMembers && errors.numberOfMembers && (
-          <p className="text-red-500 text-xs mt-1">{errors.numberOfMembers}</p>
-        )}
+        <FieldError show={touched.numberOfMembers} message={errors.numberOfMembers} />
       </div>
 
-      {/* Parent 1 / Guardian 1 Information */}
+      {/* Parent 1 / Guardian 1 */}
       <div className="mb-8">
-        <h3 className="text-lg font-medium mb-4">
-          Parent 1 / Guardian 1 Information
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-100 dark:border-slate-700">
+          Parent / Guardian 1 Information
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <Label htmlFor="parent1FirstName" className="flex">
-              First Name <span className="text-red-500 ml-1">*</span>
+            <Label htmlFor="parent1FirstName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              First Name <span className="text-red-500">*</span>
             </Label>
             <Input
               id="parent1FirstName"
@@ -113,26 +119,15 @@ export default function HouseholdInformationForm({
               placeholder="e.g., Mary"
               className={cn(
                 "w-full mt-1",
-                touched.parent1FirstName && errors.parent1FirstName
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
+                touched.parent1FirstName && errors.parent1FirstName ? "border-red-300" : ""
               )}
-              ref={
-                Object.keys(errors).length > 0 && errors.parent1FirstName
-                  ? focusRef
-                  : null
-              }
             />
-            {touched.parent1FirstName && errors.parent1FirstName && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.parent1FirstName}
-              </p>
-            )}
+            <FieldError show={touched.parent1FirstName} message={errors.parent1FirstName} />
           </div>
 
           <div>
-            <Label htmlFor="parent1LastName" className="flex">
-              Last Name <span className="text-red-500 ml-1">*</span>
+            <Label htmlFor="parent1LastName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Last Name <span className="text-red-500">*</span>
             </Label>
             <Input
               id="parent1LastName"
@@ -142,47 +137,26 @@ export default function HouseholdInformationForm({
               placeholder="e.g., Doe"
               className={cn(
                 "w-full mt-1",
-                touched.parent1LastName && errors.parent1LastName
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
+                touched.parent1LastName && errors.parent1LastName ? "border-red-300" : ""
               )}
-              ref={
-                Object.keys(errors).length > 0 && errors.parent1LastName
-                  ? focusRef
-                  : null
-              }
             />
-            {touched.parent1LastName && errors.parent1LastName && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.parent1LastName}
-              </p>
-            )}
+            <FieldError show={touched.parent1LastName} message={errors.parent1LastName} />
           </div>
 
           <div>
-            <Label htmlFor="parent1Gender">
-              Gender <span className="text-red-500 ml-1">*</span>
+            <Label htmlFor="parent1Gender" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Gender <span className="text-red-500">*</span>
             </Label>
             <Select
-              value={formData.parent1Gender}
-              onValueChange={(value) => {
-                handleSelectChange("parent1Gender", value);
-                handleBlur("parent1Gender");
-              }}
+              value={formData.parent1Gender || undefined}
+              onValueChange={(value) => handleSelectChange("parent1Gender", value)}
             >
               <SelectTrigger
                 id="parent1Gender"
                 className={cn(
                   "w-full mt-1",
-                  touched.parent1Gender && errors.parent1Gender
-                    ? "border-red-500 focus-visible:ring-red-500"
-                    : ""
+                  touched.parent1Gender && errors.parent1Gender ? "border-red-300" : ""
                 )}
-                ref={
-                  Object.keys(errors).length > 0 && errors.parent1Gender
-                    ? focusRef
-                    : null
-                }
               >
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
@@ -194,37 +168,23 @@ export default function HouseholdInformationForm({
                 ))}
               </SelectContent>
             </Select>
-            {touched.parent1Gender && errors.parent1Gender && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.parent1Gender}
-              </p>
-            )}
+            <FieldError show={touched.parent1Gender} message={errors.parent1Gender} />
           </div>
 
           <div>
-            <Label htmlFor="parent1Relationship" className="flex">
-              Relationship <span className="text-red-500 ml-1">*</span>
+            <Label htmlFor="parent1Relationship" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Relationship <span className="text-red-500">*</span>
             </Label>
             <Select
-              value={formData.parent1Relationship}
-              onValueChange={(value) => {
-                handleSelectChange("parent1Relationship", value);
-                handleBlur("parent1Relationship");
-              }}
+              value={formData.parent1Relationship || undefined}
+              onValueChange={(value) => handleSelectChange("parent1Relationship", value)}
             >
               <SelectTrigger
                 id="parent1Relationship"
                 className={cn(
                   "w-full mt-1",
-                  touched.parent1Relationship && errors.parent1Relationship
-                    ? "border-red-500 focus-visible:ring-red-500"
-                    : ""
+                  touched.parent1Relationship && errors.parent1Relationship ? "border-red-300" : ""
                 )}
-                ref={
-                  Object.keys(errors).length > 0 && errors.parent1Relationship
-                    ? focusRef
-                    : null
-                }
               >
                 <SelectValue placeholder="Select relationship" />
               </SelectTrigger>
@@ -236,32 +196,22 @@ export default function HouseholdInformationForm({
                 ))}
               </SelectContent>
             </Select>
-            {touched.parent1Relationship && errors.parent1Relationship && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.parent1Relationship}
-              </p>
-            )}
+            <FieldError show={touched.parent1Relationship} message={errors.parent1Relationship} />
           </div>
 
           <div>
-            <Label htmlFor="parent1EmploymentStatus" className="flex">
-              Employment Status <span className="text-red-500 ml-1">*</span>
+            <Label htmlFor="parent1EmploymentStatus" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Employment Status <span className="text-red-500">*</span>
             </Label>
             <Select
-              value={formData.parent1EmploymentStatus}
-              onValueChange={(value) => {
-                handleSelectChange("parent1EmploymentStatus", value);
-                handleBlur("parent1EmploymentStatus");
-              }}
+              value={formData.parent1EmploymentStatus || undefined}
+              onValueChange={(value) => handleSelectChange("parent1EmploymentStatus", value)}
             >
               <SelectTrigger
                 id="parent1EmploymentStatus"
                 className={cn(
                   "mt-1 w-full",
-                  touched.parent1EmploymentStatus &&
-                    errors.parent1EmploymentStatus
-                    ? "border-red-500 focus-visible:ring-red-500"
-                    : ""
+                  touched.parent1EmploymentStatus && errors.parent1EmploymentStatus ? "border-red-300" : ""
                 )}
               >
                 <SelectValue placeholder="Select employment status" />
@@ -274,16 +224,13 @@ export default function HouseholdInformationForm({
                 <SelectItem value="student">Student</SelectItem>
               </SelectContent>
             </Select>
-            {touched.parent1EmploymentStatus &&
-              errors.parent1EmploymentStatus && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.parent1EmploymentStatus}
-                </p>
-              )}
+            <FieldError show={touched.parent1EmploymentStatus} message={errors.parent1EmploymentStatus} />
           </div>
 
           <div>
-            <Label htmlFor="parent1Occupation">Occupation</Label>
+            <Label htmlFor="parent1Occupation" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Occupation <span className="text-gray-400 dark:text-gray-500 dark:text-gray-400 text-xs">(Optional)</span>
+            </Label>
             <Input
               id="parent1Occupation"
               value={formData.parent1Occupation}
@@ -294,13 +241,12 @@ export default function HouseholdInformationForm({
           </div>
 
           <div>
-            <Label htmlFor="parent1MonthlyIncome">Monthly Income</Label>
+            <Label htmlFor="parent1MonthlyIncome" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Monthly Income <span className="text-gray-400 dark:text-gray-500 dark:text-gray-400 text-xs">(Optional)</span>
+            </Label>
             <Select
-              id="parent1MonthlyIncome"
-              value={formData.parent1MonthlyIncome}
-              onValueChange={(value) =>
-                handleSelectChange("parent1MonthlyIncome", value)
-              }
+              value={formData.parent1MonthlyIncome || undefined}
+              onValueChange={(value) => handleSelectChange("parent1MonthlyIncome", value)}
             >
               <SelectTrigger className="mt-1 w-full">
                 <SelectValue placeholder="Select monthly income range" />
@@ -317,14 +263,17 @@ export default function HouseholdInformationForm({
         </div>
       </div>
 
-      {/* Parent 2 / Guardian 2 Information */}
+      {/* Parent 2 / Guardian 2 */}
       <div className="mb-8">
-        <h3 className="text-lg font-medium mb-4">
-          Parent 2 / Guardian 2 Information
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1 pb-2 border-b border-gray-100 dark:border-slate-700">
+          Parent / Guardian 2 Information
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+        <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 mb-4">Optional — fill in if applicable</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <Label htmlFor="parent2FirstName">First Name</Label>
+            <Label htmlFor="parent2FirstName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              First Name
+            </Label>
             <Input
               id="parent2FirstName"
               value={formData.parent2FirstName}
@@ -335,7 +284,9 @@ export default function HouseholdInformationForm({
           </div>
 
           <div>
-            <Label htmlFor="parent2LastName">Last Name</Label>
+            <Label htmlFor="parent2LastName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Last Name
+            </Label>
             <Input
               id="parent2LastName"
               value={formData.parent2LastName}
@@ -346,12 +297,10 @@ export default function HouseholdInformationForm({
           </div>
 
           <div>
-            <Label htmlFor="parent2Gender">Gender</Label>
+            <Label htmlFor="parent2Gender" className="text-sm font-medium text-gray-700 dark:text-gray-300">Gender</Label>
             <Select
-              value={formData.parent2Gender}
-              onValueChange={(value) =>
-                handleSelectChange("parent2Gender", value)
-              }
+              value={formData.parent2Gender || undefined}
+              onValueChange={(value) => handleSelectChange("parent2Gender", value)}
             >
               <SelectTrigger id="parent2Gender" className="mt-1 w-full">
                 <SelectValue placeholder="Select gender" />
@@ -367,12 +316,10 @@ export default function HouseholdInformationForm({
           </div>
 
           <div>
-            <Label htmlFor="parent2Relationship">Relationship</Label>
+            <Label htmlFor="parent2Relationship" className="text-sm font-medium text-gray-700 dark:text-gray-300">Relationship</Label>
             <Select
-              value={formData.parent2Relationship}
-              onValueChange={(value) =>
-                handleSelectChange("parent2Relationship", value)
-              }
+              value={formData.parent2Relationship || undefined}
+              onValueChange={(value) => handleSelectChange("parent2Relationship", value)}
             >
               <SelectTrigger id="parent2Relationship" className="mt-1 w-full">
                 <SelectValue placeholder="Select relationship" />
@@ -388,17 +335,12 @@ export default function HouseholdInformationForm({
           </div>
 
           <div>
-            <Label htmlFor="parent2EmploymentStatus">Employment Status</Label>
+            <Label htmlFor="parent2EmploymentStatus" className="text-sm font-medium text-gray-700 dark:text-gray-300">Employment Status</Label>
             <Select
-              value={formData.parent2EmploymentStatus}
-              onValueChange={(value) =>
-                handleSelectChange("parent2EmploymentStatus", value)
-              }
+              value={formData.parent2EmploymentStatus || undefined}
+              onValueChange={(value) => handleSelectChange("parent2EmploymentStatus", value)}
             >
-              <SelectTrigger
-                id="parent2EmploymentStatus"
-                className="mt-1 w-full"
-              >
+              <SelectTrigger id="parent2EmploymentStatus" className="mt-1 w-full">
                 <SelectValue placeholder="Select employment status" />
               </SelectTrigger>
               <SelectContent>
@@ -412,7 +354,7 @@ export default function HouseholdInformationForm({
           </div>
 
           <div>
-            <Label htmlFor="parent2Occupation">Occupation</Label>
+            <Label htmlFor="parent2Occupation" className="text-sm font-medium text-gray-700 dark:text-gray-300">Occupation</Label>
             <Input
               id="parent2Occupation"
               value={formData.parent2Occupation}
@@ -423,13 +365,10 @@ export default function HouseholdInformationForm({
           </div>
 
           <div>
-            <Label htmlFor="parent2MonthlyIncome">Monthly Income</Label>
+            <Label htmlFor="parent2MonthlyIncome" className="text-sm font-medium text-gray-700 dark:text-gray-300">Monthly Income</Label>
             <Select
-              id="parent2MonthlyIncome"
-              value={formData.parent2MonthlyIncome}
-              onValueChange={(value) =>
-                handleSelectChange("parent2MonthlyIncome", value)
-              }
+              value={formData.parent2MonthlyIncome || undefined}
+              onValueChange={(value) => handleSelectChange("parent2MonthlyIncome", value)}
             >
               <SelectTrigger className="mt-1 w-full">
                 <SelectValue placeholder="Select monthly income range" />
@@ -445,8 +384,6 @@ export default function HouseholdInformationForm({
           </div>
         </div>
       </div>
-
-      {/* Member 1 Information */}
     </div>
   );
 }

@@ -10,7 +10,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const countries = [
@@ -38,7 +38,7 @@ export default function PersonalInformationForm({
   handleBlur,
   errors = {},
   touched = {},
-  validateField, // Validation function from parent component
+  validateField,
 }) {
   const [localFormData, setLocalFormData] = useState({
     fullName: "",
@@ -60,7 +60,6 @@ export default function PersonalInformationForm({
   const [localErrors, setLocalErrors] = useState({});
   const [localTouched, setLocalTouched] = useState({});
 
-  // Sync local form data with parent form data
   useEffect(() => {
     setLocalFormData((prev) => ({
       ...prev,
@@ -68,7 +67,6 @@ export default function PersonalInformationForm({
     }));
   }, [formData]);
 
-  // Combine local and parent errors/touched states
   const combinedErrors = { ...localErrors, ...errors };
   const combinedTouched = { ...localTouched, ...touched };
 
@@ -77,7 +75,6 @@ export default function PersonalInformationForm({
     const newFormData = { ...localFormData, [id]: value };
     setLocalFormData(newFormData);
 
-    // Real-time validation for touched fields using parent's validation function
     if (combinedTouched[id] && validateField) {
       const fieldError = validateField(id, value, newFormData);
       setLocalErrors((prev) => ({
@@ -86,24 +83,17 @@ export default function PersonalInformationForm({
       }));
     }
 
-    // Call parent's input change handler if provided
-    if (handleInputChange) {
-      handleInputChange(e);
-    }
-
-    // Call parent's form change handler if provided
-    if (onFormChange) {
-      onFormChange(newFormData);
-    }
+    if (handleInputChange) handleInputChange(e);
+    if (onFormChange) onFormChange(newFormData);
   };
 
+  // Fixed select handler - validates with the NEW value, not the old one
   const handleLocalSelectChange = (fieldName, value) => {
     const newFormData = { ...localFormData, [fieldName]: value };
     setLocalFormData(newFormData);
-
-    // Mark field as touched and validate using parent's validation function
     setLocalTouched((prev) => ({ ...prev, [fieldName]: true }));
 
+    // Validate with the new value immediately
     if (validateField) {
       const fieldError = validateField(fieldName, value, newFormData);
       setLocalErrors((prev) => ({
@@ -112,21 +102,13 @@ export default function PersonalInformationForm({
       }));
     }
 
-    // Call parent's select change handler if provided
-    if (handleSelectChange) {
-      handleSelectChange(fieldName, value);
-    }
-
-    // Call parent's form change handler if provided
-    if (onFormChange) {
-      onFormChange(newFormData);
-    }
+    if (handleSelectChange) handleSelectChange(fieldName, value);
+    if (onFormChange) onFormChange(newFormData);
   };
 
   const handleLocalBlur = (fieldName) => {
     setLocalTouched((prev) => ({ ...prev, [fieldName]: true }));
 
-    // Validate field on blur using parent's validation function
     if (validateField) {
       const fieldError = validateField(
         fieldName,
@@ -139,9 +121,7 @@ export default function PersonalInformationForm({
       }));
     }
 
-    if (handleBlur) {
-      handleBlur(fieldName);
-    }
+    if (handleBlur) handleBlur(fieldName);
   };
 
   const getFieldStatus = (fieldName) => {
@@ -156,25 +136,37 @@ export default function PersonalInformationForm({
     const status = getFieldStatus(fieldName);
     return cn(
       "mt-1 transition-colors",
-      status === "error" && "border-red-500 focus-visible:ring-red-500",
-      status === "success" && "border-green-500 focus-visible:ring-green-500"
+      status === "error" && "border-red-300 focus-visible:ring-red-500",
+      status === "success" && "border-emerald-300 focus-visible:ring-emerald-500"
+    );
+  };
+
+  const FieldError = ({ field }) => {
+    if (!combinedTouched[field] || !combinedErrors[field]) return null;
+    return (
+      <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+        <AlertCircle className="w-3 h-3 flex-shrink-0" />
+        {combinedErrors[field]}
+      </p>
     );
   };
 
   return (
-    <>
-      <h2 className="text-xl text-cyan-800 font-bold mb-2 text-center">
-        Personal Information
-      </h2>
-      <p className="text-gray-500 text-sm mb-12 text-center">
-        Please fill in your personal details accurately.
-      </p>
+    <div>
+      <div className="text-center mb-8">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          Personal Information
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Please fill in your personal details accurately.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Full Name */}
         <div>
-          <Label htmlFor="fullName" className="flex text-md">
-            Full Name <span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="fullName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Full Name <span className="text-red-500">*</span>
           </Label>
           <Input
             id="fullName"
@@ -185,18 +177,13 @@ export default function PersonalInformationForm({
             className={getFieldClassName("fullName")}
             maxLength={100}
           />
-          {combinedTouched.fullName && combinedErrors.fullName && (
-            <p className="text-red-500 text-xs mt-1 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {combinedErrors.fullName}
-            </p>
-          )}
+          <FieldError field="fullName" />
         </div>
 
         {/* Email */}
         <div>
-          <Label htmlFor="email" className="flex text-md">
-            Email Address <span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Email Address <span className="text-red-500">*</span>
           </Label>
           <Input
             id="email"
@@ -208,18 +195,13 @@ export default function PersonalInformationForm({
             className={getFieldClassName("email")}
             maxLength={254}
           />
-          {combinedTouched.email && combinedErrors.email && (
-            <p className="text-red-500 text-xs mt-1 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {combinedErrors.email}
-            </p>
-          )}
+          <FieldError field="email" />
         </div>
 
         {/* Phone */}
         <div>
-          <Label htmlFor="phone" className="flex text-md">
-            Phone Number <span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="phone" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Phone Number <span className="text-red-500">*</span>
           </Label>
           <Input
             id="phone"
@@ -231,17 +213,13 @@ export default function PersonalInformationForm({
             className={getFieldClassName("phone")}
             maxLength={10}
           />
-          {combinedTouched.phone && combinedErrors.phone && (
-            <p className="text-red-500 text-xs mt-1 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {combinedErrors.phone}
-            </p>
-          )}
+          <FieldError field="phone" />
         </div>
+
         {/* ID Number */}
         <div>
-          <Label htmlFor="idnumber" className="flex text-md">
-            ID Number <span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="idnumber" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            ID Number <span className="text-red-500">*</span>
           </Label>
           <Input
             id="idnumber"
@@ -252,18 +230,13 @@ export default function PersonalInformationForm({
             className={getFieldClassName("idnumber")}
             maxLength={13}
           />
-          {combinedTouched.idnumber && combinedErrors.idnumber && (
-            <p className="text-red-500 text-xs mt-1 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {combinedErrors.idnumber}
-            </p>
-          )}
+          <FieldError field="idnumber" />
         </div>
 
         {/* Date of Birth */}
         <div>
-          <Label htmlFor="dob" className="flex text-md">
-            Date of Birth <span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="dob" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Date of Birth <span className="text-red-500">*</span>
           </Label>
           <Input
             id="dob"
@@ -279,83 +252,69 @@ export default function PersonalInformationForm({
                 .split("T")[0]
             }
           />
-          {combinedTouched.dob && combinedErrors.dob && (
-            <p className="text-red-500 text-xs mt-1 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {combinedErrors.dob}
-            </p>
-          )}
+          <FieldError field="dob" />
         </div>
 
-        {/* Gender and Nationality Row */}
-        <div className="md:col-span-2 flex flex-col md:flex-row gap-6">
-          <div className="w-full md:w-1/2">
-            <Label htmlFor="gender" className="flex text-md">
-              Gender <span className="text-red-500 ml-1">*</span>
-            </Label>
-            <Select
-              value={localFormData.gender}
-              onValueChange={(value) =>
-                handleLocalSelectChange("gender", value)
-              }
+        {/* Gender */}
+        <div>
+          <Label htmlFor="gender" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Gender <span className="text-red-500">*</span>
+          </Label>
+          <Select
+            value={localFormData.gender || undefined}
+            onValueChange={(value) =>
+              handleLocalSelectChange("gender", value)
+            }
+          >
+            <SelectTrigger
+              id="gender"
+              className={cn("w-full", getFieldClassName("gender"))}
             >
-              <SelectTrigger
-                id="gender"
-                className={`w-full ${getFieldClassName("gender")}`}
-              >
-                <SelectValue placeholder="Select gender" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Male">Male</SelectItem>
-                <SelectItem value="Female">Female</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
-                <SelectItem value="Prefer not to say">
-                  Prefer not to say
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            {combinedTouched.gender && combinedErrors.gender && (
-              <p className="text-red-500 text-xs mt-1 flex items-center">
-                <AlertCircle className="w-3 h-3 mr-1" />
-                {combinedErrors.gender}
-              </p>
-            )}
-          </div>
+              <SelectValue placeholder="Select gender" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Male">Male</SelectItem>
+              <SelectItem value="Female">Female</SelectItem>
+              <SelectItem value="Other">Other</SelectItem>
+              <SelectItem value="Prefer not to say">
+                Prefer not to say
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <FieldError field="gender" />
+        </div>
 
-          <div className="w-full md:w-1/2">
-            <Label htmlFor="nationality" className="flex text-md">
-              Nationality <span className="text-red-500 ml-1">*</span>
-            </Label>
-            <Input
-              id="nationality"
-              value={localFormData.nationality}
-              onChange={handleLocalInputChange}
-              onBlur={() => handleLocalBlur("nationality")}
-              placeholder="e.g., South African"
-              className={getFieldClassName("nationality")}
-              maxLength={50}
-            />
-            {combinedTouched.nationality && combinedErrors.nationality && (
-              <p className="text-red-500 text-xs mt-1 flex items-center">
-                <AlertCircle className="w-3 h-3 mr-1" />
-                {combinedErrors.nationality}
-              </p>
-            )}
-          </div>
+        {/* Nationality */}
+        <div>
+          <Label htmlFor="nationality" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Nationality <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="nationality"
+            value={localFormData.nationality}
+            onChange={handleLocalInputChange}
+            onBlur={() => handleLocalBlur("nationality")}
+            placeholder="e.g., South African"
+            className={getFieldClassName("nationality")}
+            maxLength={50}
+          />
+          <FieldError field="nationality" />
         </div>
 
         {/* Country */}
-        <div className="md:col-span-1">
-          <Label htmlFor="country" className="flex text-md">
-            Country of Residence <span className="text-red-500 ml-1">*</span>
+        <div>
+          <Label htmlFor="country" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Country of Residence <span className="text-red-500">*</span>
           </Label>
           <Select
-            value={localFormData.country}
-            onValueChange={(value) => handleLocalSelectChange("country", value)}
+            value={localFormData.country || undefined}
+            onValueChange={(value) =>
+              handleLocalSelectChange("country", value)
+            }
           >
             <SelectTrigger
               id="country"
-              className={`w-full ${getFieldClassName("country")}`}
+              className={cn("w-full", getFieldClassName("country"))}
             >
               <SelectValue placeholder="Select country" />
             </SelectTrigger>
@@ -367,18 +326,13 @@ export default function PersonalInformationForm({
               ))}
             </SelectContent>
           </Select>
-          {combinedTouched.country && combinedErrors.country && (
-            <p className="text-red-500 text-xs mt-1 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {combinedErrors.country}
-            </p>
-          )}
+          <FieldError field="country" />
         </div>
 
         {/* Address Line 1 */}
         <div className="md:col-span-2">
-          <Label htmlFor="address1" className="flex text-md">
-            Address Line 1 <span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="address1" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Address Line 1 <span className="text-red-500">*</span>
           </Label>
           <Input
             id="address1"
@@ -389,17 +343,14 @@ export default function PersonalInformationForm({
             className={getFieldClassName("address1")}
             maxLength={200}
           />
-          {combinedTouched.address1 && combinedErrors.address1 && (
-            <p className="text-red-500 text-xs mt-1 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {combinedErrors.address1}
-            </p>
-          )}
+          <FieldError field="address1" />
         </div>
 
         {/* Address Line 2 */}
         <div className="md:col-span-2">
-          <Label htmlFor="address2">Address Line 2 (Optional)</Label>
+          <Label htmlFor="address2" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Address Line 2 <span className="text-gray-400 text-xs">(Optional)</span>
+          </Label>
           <Input
             id="address2"
             value={localFormData.address2}
@@ -412,8 +363,8 @@ export default function PersonalInformationForm({
 
         {/* City */}
         <div>
-          <Label htmlFor="city" className="flex text-md">
-            City <span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="city" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            City <span className="text-red-500">*</span>
           </Label>
           <Input
             id="city"
@@ -424,18 +375,13 @@ export default function PersonalInformationForm({
             className={getFieldClassName("city")}
             maxLength={100}
           />
-          {combinedTouched.city && combinedErrors.city && (
-            <p className="text-red-500 text-xs mt-1 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {combinedErrors.city}
-            </p>
-          )}
+          <FieldError field="city" />
         </div>
 
         {/* State */}
         <div>
-          <Label htmlFor="state" className="flex text-md">
-            State / Province <span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="state" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            State / Province <span className="text-red-500">*</span>
           </Label>
           <Input
             id="state"
@@ -446,23 +392,17 @@ export default function PersonalInformationForm({
             className={getFieldClassName("state")}
             maxLength={100}
           />
-          {combinedTouched.state && combinedErrors.state && (
-            <p className="text-red-500 text-xs mt-1 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {combinedErrors.state}
-            </p>
-          )}
+          <FieldError field="state" />
         </div>
 
         {/* Postal Code */}
         <div>
-          <Label htmlFor="postalCode" className="flex text-md">
-            Postal Code <span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="postalCode" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Postal Code <span className="text-red-500">*</span>
           </Label>
           <Input
             id="postalCode"
-            type={"number"}
-            s
+            type="number"
             value={localFormData.postalCode}
             onChange={handleLocalInputChange}
             onBlur={() => handleLocalBlur("postalCode")}
@@ -470,14 +410,9 @@ export default function PersonalInformationForm({
             className={getFieldClassName("postalCode")}
             minLength={4}
           />
-          {combinedTouched.postalCode && combinedErrors.postalCode && (
-            <p className="text-red-500 text-xs mt-1 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {combinedErrors.postalCode}
-            </p>
-          )}
+          <FieldError field="postalCode" />
         </div>
       </div>
-    </>
+    </div>
   );
 }

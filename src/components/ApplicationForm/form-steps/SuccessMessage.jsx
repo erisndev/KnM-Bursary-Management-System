@@ -1,26 +1,26 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { IoMdCheckmarkCircleOutline } from "react-icons/io";
+import { CheckCircle2 } from "lucide-react";
 
 const SuccessMessage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-      <IoMdCheckmarkCircleOutline className="text-6xl text-cyan-600 mb-4" />
-      <h2 className="text-2xl font-bold text-cyan-600 mb-4">
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6">
+        <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
         Application Submitted!
       </h2>
-      <p className="mb-6">
-        Thank you for applying. We will get back to you soon.
+      <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-sm">
+        Thank you for applying. We will review your application and get back to you soon.
       </p>
-      <Button
-        className="bg-cyan-800 hover:bg-cyan-700 text-white text-lg mt-6"
+      <button
+        className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-medium rounded-lg transition-colors text-sm"
         onClick={() => navigate("/dashboard")}
       >
-        Go to MyDashboard
-      </Button>
+        Go to Dashboard
+      </button>
     </div>
   );
 };
